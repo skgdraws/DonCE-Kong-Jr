@@ -223,7 +223,7 @@ Este proyecto fue desarrollado con fines educativos.
 
 ## 👥 Autores
 
-- **Pamela Chacón** - [@PamelaChB](https://github.com/skgdraws)
+- **Pamela Chacón** - [@PamelaChB](https://github.com/pamelachb)
 - **Franco Sagot** [@SKGDraws](https://github.com/skgdraws)
 - **Kevin Ruiz** - [@Kevrr](https://github.com/kevrr)
 
