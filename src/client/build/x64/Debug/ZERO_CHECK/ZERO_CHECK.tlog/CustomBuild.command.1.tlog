@@ -1,0 +1,10 @@
+^D:\REPOS\TEC\PARADIGMAS\DONCE-KONG-JR\SRC\CLIENT\BUILD\CMAKEFILES\B758CD0F3F5297D92978ABF8A0EC8C9A\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SD:/Repos/TEC/Paradigmas/DonCE-Kong-Jr/src/client -BD:/Repos/TEC/Paradigmas/DonCE-Kong-Jr/src/client/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file D:/Repos/TEC/Paradigmas/DonCE-Kong-Jr/src/client/build/DonCE-Kong-Jr.slnx
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
