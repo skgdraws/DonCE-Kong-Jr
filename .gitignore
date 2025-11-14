@@ -1,0 +1,3 @@
+# Client Cmake stuff
+src/client/build/*
+src/client/Debug/*
