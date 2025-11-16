@@ -1,5 +1,6 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
+#include <stdbool.h>
 
 /*
     Project: DonCE-Kong-Jr
@@ -13,41 +14,54 @@
 static SDL_Window *window = NULL;
 static SDL_Renderer *renderer = NULL;
 
-// Corre al iniciar la aplicacion
-SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
+    bool running = true;
+    SDL_Event event;
 
     // Metadata de la aplicacion
-    SDL_SetAppMetadata("DonCE-Kong-Jr", "1.0", "com.tec.donce-kong-jr");
+    SDL_SetAppMetadata("DonCE Kong Jr", "1.0", "com.tec.donce-kong-jr");
 
-    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+    // Inicializar SDL
+    if (!SDL_Init(SDL_INIT_VIDEO)) {
         SDL_Log("No se pudo inicializar SDL: %s", SDL_GetError());
-        return SDL_APP_FAILURE;
+        return 1;
     }
 
-    if (!SDL_CreateWindowAndRenderer("examples/renderer/clear", 512, 448, SDL_WINDOW_RESIZABLE, &window, &renderer)) {
-        SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
-        return SDL_APP_FAILURE;
+    // Crear ventana y renderer
+    if (!SDL_CreateWindowAndRenderer("DonCE-Kong-Jr", 512, 448, SDL_WINDOW_RESIZABLE, &window, &renderer)) {
+        SDL_Log("No se pudo crear la ventana/renderer: %s", SDL_GetError());
+        SDL_Quit();
+        return 1;
     }
 
     SDL_SetRenderLogicalPresentation(renderer, 512, 448, SDL_LOGICAL_PRESENTATION_LETTERBOX);
 
-    return SDL_APP_CONTINUE;
-}
+    // Loop principal del juego
+    while (running) {
+        // Procesar eventos
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_EVENT_QUIT) {
+                running = false;
+            }
+        }
 
-// Esta es la función que corre cada vez que hay un evento (input de mouse, teclado, etc)
-SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
+        // Limpiar pantalla con color negro
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderClear(renderer);
 
-    if (event->type == SDL_EVENT_QUIT) {
-        return SDL_APP_SUCCESS;  // Termina el programa, reportando exito al SO.
+        // Aquí irá el código de renderizado del juego
+
+        // Presentar el frame
+        SDL_RenderPresent(renderer);
+
+        // Limitar a ~60 FPS
+        SDL_Delay(16);
     }
-    return SDL_APP_CONTINUE;  // Continua con el programa!
+
+    // Limpieza
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+
+    return 0;
 }
-
-// Esta es la función que corre una vez por frame
-SDL_AppResult SDL_AppIterate(void *appstate){
-
-    return SDL_APP_CONTINUE;  // Continua con el programa!
-}
-
-// Corre al cerrar la aplicacion
-void SDL_AppQuit(void *appstate, SDL_AppResult result) {}

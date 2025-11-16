@@ -6,6 +6,8 @@
             "type": "shell",
             "command": "cmake",
             "args": [
+                "-G",
+                "MinGW Makefiles",
                 "-B",
                 "build"
             ],
@@ -33,7 +35,7 @@
         {
             "label": "Run Program",
             "type": "shell",
-            "command": "${workspaceFolder}\\Debug\\main.exe",
+            "command": "${workspaceFolder}\\main.exe",
             "problemMatcher": [],
             "presentation": {
                 "reveal": "always",

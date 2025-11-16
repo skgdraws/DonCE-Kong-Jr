@@ -18,11 +18,11 @@ target_include_directories(main PRIVATE ${SDL3_INCLUDE_DIR})
 # Link SDL3 library
 target_link_libraries(main ${SDL3_LIBRARY})
 
-# Copy SDL3.dll to build directory
+# Copy SDL3.dll to project root directory
 add_custom_command(TARGET main POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    ${CMAKE_CURRENT_SOURCE_DIR}/SDL3.dll
-    $<TARGET_FILE_DIR:main>)
+    ${SDL3_DIR}/x86_64-w64-mingw32/bin/SDL3.dll
+    ${CMAKE_CURRENT_SOURCE_DIR})
 
 message(STATUS "Using SDL3 from: ${SDL3_DIR}")
 
