@@ -6,9 +6,7 @@
 ## Semana 1 - [Fecha Inicio - Fecha Fin]
 
 ### Tareas Asignadas
-- [ ] Tarea 1
-- [ ] Tarea 2
-- [ ] Tarea 3
+- [X] Creación de Sockets en Java
 
 ### Progreso Diario
 
