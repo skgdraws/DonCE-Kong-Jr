@@ -31,6 +31,38 @@ static SDL_Renderer *renderer = NULL;
 static GameState gameState = GAME_STATE_MENU;
 static MenuOption selectedOption = MENU_START;
 
+// Texturas
+static SDL_Texture *backgroundTexture = NULL;
+
+// Variables del bloque jugador
+static float playerX = 230.0f;
+static float playerY = 200.0f;
+static float playerVelX = 0.0f;
+static float playerVelY = 0.0f;
+static const float PLAYER_SPEED = 3.0f;
+static const float PLAYER_SIZE = 32.0f;
+
+void loadAssets() {
+    // Establecer filtro de escalado a nearest neighbor para pixeles nitidos
+    SDL_SetHint("SDL_RENDER_SCALE_QUALITY", "0");
+
+    // Cargar imagen de fondo
+    SDL_Surface *bgSurface = SDL_LoadBMP("assets/img/bg.bmp");
+    if (bgSurface) {
+        backgroundTexture = SDL_CreateTextureFromSurface(renderer, bgSurface);
+        SDL_DestroySurface(bgSurface);
+        if (backgroundTexture) {
+            // Configurar filtro nearest neighbor para la textura
+            SDL_SetTextureScaleMode(backgroundTexture, SDL_SCALEMODE_NEAREST);
+            SDL_Log("Fondo cargado correctamente");
+        } else {
+            SDL_Log("Error al crear textura del fondo: %s", SDL_GetError());
+        }
+    } else {
+        SDL_Log("Error al cargar fondo: %s", SDL_GetError());
+    }
+}
+
 // Funcion para renderizar el menu principal
 void renderMenu() {
     // Limpiar pantalla
@@ -65,18 +97,23 @@ void renderMenu() {
 // Funcion para renderizar el juego
 void renderGame() {
     // Limpiar pantalla
-    SDL_SetRenderDrawColor(renderer, 20, 20, 40, 255);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
-    // Pantalla de juego (temporal)
-    SDL_SetRenderDrawColor(renderer, 0, 100, 0, 255);
-    SDL_FRect gameRect = {50, 50, 412, 348};
-    SDL_RenderFillRect(renderer, &gameRect);
+    // Dibujar el fondo si existe
+    if (backgroundTexture) {
+        SDL_RenderTexture(renderer, backgroundTexture, NULL, NULL);
+    } else {
+        // Fondo de respaldo si no se carga la imagen
+        SDL_SetRenderDrawColor(renderer, 0, 100, 0, 255);
+        SDL_FRect gameRect = {50, 50, 412, 348};
+        SDL_RenderFillRect(renderer, &gameRect);
+    }
 
-    // Texto de placeholder
-    SDL_FRect textRect = {200, 200, 100, 30};
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_RenderFillRect(renderer, &textRect);
+    // Dibujar el bloque del jugador
+    SDL_FRect playerRect = {playerX, playerY, PLAYER_SIZE, PLAYER_SIZE};
+    SDL_SetRenderDrawColor(renderer, 255, 100, 100, 255);
+    SDL_RenderFillRect(renderer, &playerRect);
 }
 
 // Funcion principal de renderizado
@@ -125,8 +162,47 @@ void handleMenuInput(SDL_Event *event) {
 
 // Funcion para manejar input del juego
 void handleGameInput(SDL_Event *event) {
-    if (event->type == SDL_EVENT_KEY_DOWN && event->key.key == SDLK_ESCAPE) {
-        gameState = GAME_STATE_MENU;
+    if (event->type == SDL_EVENT_KEY_DOWN) {
+        switch (event->key.key) {
+            case SDLK_ESCAPE:
+                gameState = GAME_STATE_MENU;
+                break;
+            case SDLK_W:
+            case SDLK_UP:
+                playerVelY = -PLAYER_SPEED;
+                break;
+            case SDLK_S:
+            case SDLK_DOWN:
+                playerVelY = PLAYER_SPEED;
+                break;
+            case SDLK_A:
+            case SDLK_LEFT:
+                playerVelX = -PLAYER_SPEED;
+                break;
+            case SDLK_D:
+            case SDLK_RIGHT:
+                playerVelX = PLAYER_SPEED;
+                break;
+        }
+    } else if (event->type == SDL_EVENT_KEY_UP) {
+        switch (event->key.key) {
+            case SDLK_W:
+            case SDLK_UP:
+                if (playerVelY < 0) playerVelY = 0;
+                break;
+            case SDLK_S:
+            case SDLK_DOWN:
+                if (playerVelY > 0) playerVelY = 0;
+                break;
+            case SDLK_A:
+            case SDLK_LEFT:
+                if (playerVelX < 0) playerVelX = 0;
+                break;
+            case SDLK_D:
+            case SDLK_RIGHT:
+                if (playerVelX > 0) playerVelX = 0;
+                break;
+        }
     }
 }
 
@@ -155,8 +231,18 @@ void handleEvents(bool *running) {
 
 // Funcion para actualizar la logica del juego
 void update() {
-    // Aqui ira la logica de actualizacion del juego
-    // Por ahora no hay nada que actualizar
+    // Solo actualizar si estamos jugando
+    if (gameState == GAME_STATE_PLAYING) {
+        // Actualizar posicion del jugador
+        playerX += playerVelX;
+        playerY += playerVelY;
+
+        // Mantener al jugador dentro de los limites
+        if (playerX < 0) playerX = 0;
+        if (playerY < 0) playerY = 0;
+        if (playerX > 512 - PLAYER_SIZE) playerX = 512 - PLAYER_SIZE;
+        if (playerY > 448 - PLAYER_SIZE) playerY = 448 - PLAYER_SIZE;
+    }
 }
 
 int main(int argc, char *argv[]) {
@@ -172,13 +258,15 @@ int main(int argc, char *argv[]) {
     }
 
     // Crear ventana y renderer
-    if (!SDL_CreateWindowAndRenderer("DonCE-Kong-Jr", 512, 448, SDL_WINDOW_RESIZABLE, &window, &renderer)) {
+    if (!SDL_CreateWindowAndRenderer("DonCE Kong Jr", 512, 448, SDL_WINDOW_RESIZABLE, &window, &renderer)) {
         SDL_Log("No se pudo crear la ventana/renderer: %s", SDL_GetError());
         SDL_Quit();
         return 1;
     }
 
     SDL_SetRenderLogicalPresentation(renderer, 512, 448, SDL_LOGICAL_PRESENTATION_LETTERBOX);
+
+    loadAssets();
 
     // Loop principal del juego
     while (running) {
@@ -196,6 +284,9 @@ int main(int argc, char *argv[]) {
     }
 
     // Limpieza
+    if (backgroundTexture) {
+        SDL_DestroyTexture(backgroundTexture);
+    }
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
