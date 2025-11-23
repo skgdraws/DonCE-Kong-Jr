@@ -11,36 +11,45 @@
 - [x] Set up SDL renderer
 - [ ] Implement window icon
 - [x] Add window title
-- [ ] Handle window resize events
-- [ ] Implement proper SDL cleanup on exit
+- [x] Implement proper SDL cleanup on exit
 
 ## 🎮 Main Game Loop
-- [ ] Create main event loop
-- [ ] Implement frame rate limiting (target FPS)
-- [ ] Add delta time calculation
-- [ ] Handle quit events (window close, ESC key)
-- [ ] Set up game state system (menu, playing, etc.)
+- [x] Create main event loop
+- [x] Implement frame rate limiting (target FPS)
+- [x] Handle quit events (window close, ESC key)
+- [x] Set up game state system (menu, playing, etc.)
 
 ## 📝 Main Menu UI
-- [ ] Design main menu layout
-- [ ] Load and render menu background
+- [x] Design main menu layout
+- [x] Load and render menu background
 - [ ] Load font for menu text (from `assets/font/`)
-- [ ] Create menu buttons:
-  - [ ] Start Game
-  - [ ] Spectate Game
+- [x] Create menu buttons:
+  - [x] Start Game
   - [ ] Options/Settings
-  - [ ] Exit
-- [ ] Implement button hover effects
+  - [x] Exit
+- [x] Implement button hover effects
 - [ ] Add button click detection
-- [ ] Implement keyboard navigation (arrow keys, Enter)
+- [x] Implement keyboard navigation (arrow keys, Enter)
 - [ ] Add menu selection sound effects
 
 ## 🎨 Graphics & Rendering
-- [ ] Load menu background image (from `assets/img/`)
-- [ ] Implement texture loading system
+- [x] Load background image (from `assets/img/`)
+- [x] Implement texture loading system
 - [ ] Create text rendering function
-- [ ] Add menu logo/title graphic
-- [ ] Implement basic color schemes
+- [x] Add menu logo/title graphic (placeholder)
+- [x] Implement basic color schemes
+- [x] Set up nearest neighbor filtering for pixel art
+- [x] Separate rendering into functions (renderMenu, renderGame, render)
+
+## 🎮 Gameplay
+- [x] Create player block/entity
+- [x] Implement basic movement (WASD/Arrow keys)
+- [x] Add collision with screen boundaries
+- [x] Separate game logic into update function
+- [ ] Add sprite/texture for player character
+- [ ] Implement jumping mechanics
+- [ ] Add platforms/level geometry
+- [ ] Implement enemy entities
 
 ## 🔊 Audio for Menu
 - [ ] Initialize SDL audio system
@@ -55,26 +64,39 @@
   - [ ] `menu.h` - Menu system
   - [ ] `renderer.h` - Rendering utilities
   - [ ] `audio.h` - Audio system
+  - [ ] `player.h` - Player logic
+  - [ ] `game.h` - Game state management
 - [ ] Split code into multiple source files
-- [ ] Add proper error handling
-- [ ] Add logging/debug output
+- [x] Add proper error handling
+- [x] Add logging/debug output
+- [x] Organize functions (render, update, input handling)
 
 ## 📦 Build & Assets
 - [x] Set up CMake build system
-- [x] Configure SDL3 library linking
+- [x] Configure SDL3 library linking (MinGW)
 - [x] Create VS Code build tasks
-- [ ] Organize asset directories:
+- [x] Configure nearest neighbor texture filtering
+- [x] Organize asset directories:
   - [ ] Add placeholder font file to `assets/font/`
-  - [ ] Add menu graphics to `assets/img/`
+  - [x] Add background graphic to `assets/img/`
   - [ ] Add menu sounds to `assets/sound/`
 
 ---
 
 ## 📋 Current Sprint
+**Completed:**
+- ✅ SDL3 window initialization and rendering
+- ✅ Basic main menu with navigation (3 options)
+- ✅ Game state system (Menu/Playing/Quit)
+- ✅ Background image loading and rendering
+- ✅ Player movement with keyboard controls
+- ✅ Code organization (separate render/update/input functions)
+
 **Priority Tasks:**
-1. Get SDL3 window displaying
-2. Implement basic main menu with text
-3. Add button interaction
+1. Add text rendering for menu labels
+2. Implement player sprite/texture
+3. Add basic level geometry (platforms)
+4. Implement jumping mechanics
 
 **Notes:**
 - SDL3 development package located at: `D:\Libraries\SDL3-3.2.26-mingw`
