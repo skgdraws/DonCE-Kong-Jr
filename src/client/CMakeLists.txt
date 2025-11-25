@@ -10,7 +10,16 @@ set(SDL3_INCLUDE_DIR "${SDL3_DIR}/x86_64-w64-mingw32/include")
 set(SDL3_LIBRARY "${SDL3_DIR}/x86_64-w64-mingw32/lib/libSDL3.dll.a")
 
 # Add executable
-add_executable(main main.c)
+add_executable(main 
+    src/main.c
+    src/game_state.c
+    src/player.c
+    src/enemy.c
+    src/assets.c
+    src/renderer.c
+    src/input.c
+    src/game_logic.c
+)
 
 # Include SDL3 headers
 target_include_directories(main PRIVATE ${SDL3_INCLUDE_DIR})
