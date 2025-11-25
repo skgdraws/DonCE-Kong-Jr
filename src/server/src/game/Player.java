@@ -1,17 +1,12 @@
 package game;
 
+import java.lang.Math;
+
 public class Player extends Entity {
-    private int lives;
-    protected double vx;
-    protected double vy;
+    protected int lives;
+    protected int score;
     protected boolean onGround;
     protected boolean climbing;
-
-    @Override
-    public void update() {
-        this.x += this.vx;
-        this.y += this.vy;
-    }
 
     public void applyGravity() {
         if (!this.onGround && !this.climbing) {
@@ -24,33 +19,56 @@ public class Player extends Entity {
         }
     }
 
+    public void jump() {
+        this.vy = -10;
+        this.onGround = false;
+    }
+
+    public void stop() {
+        if (this.vx < 0) {
+            this.vx += 0.1;
+        } else if (this.vx > 0) {
+            this.vx -= 0.1;
+        }
+    }
+
     public void move(String direction) {
+        int maxSpeed = 9;
+        int maxClimbSpeed = 6;
         switch (direction) {
             case "up":
                 if (this.climbing) {
-                    this.vy -= 0.1;
-                } else  {
+                    this.vy -= 3;
+                    if (Math.abs(this.vy) > maxClimbSpeed) {
+                        this.vy = -maxSpeed;
+                    }
+                } else {
                     this.jump();
                 }
                 break;
             case "down":
                 if (this.climbing) {
-                    this.vy += 0.1;
+                    this.vy += 3;
+                    if (this.vy > maxClimbSpeed) {
+                        this.vy = maxClimbSpeed;
+                    }
                 }
                 break;
             case "left":
-                this.vx -= 0.1;
+                this.vx -= 3;
+                if (Math.abs(this.vx) > maxSpeed) {
+                    this.vx = -maxSpeed;
+                }
                 break;
             case "right":
-                this.vx += 0.1;
+                this.vx += 3;
+                if (this.vx > maxSpeed) {
+                    this.vx = maxSpeed;
+                }
                 break;
             default:
-                
+                this.stop();
+                break;
         }
-    }
-
-    public void jump() {
-        this.vy = -10;
-        this.onGround = false;
     }
 }
