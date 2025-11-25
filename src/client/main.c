@@ -1,6 +1,9 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <time.h>
+#include <string.h>
 
 /*
     Project: DonCE-Kong-Jr
@@ -25,6 +28,53 @@ typedef enum {
     MENU_COUNT
 } MenuOption;
 
+// Constantes del jugador
+#define PLAYER_SPEED 3.0f
+#define PLAYER_SIZE 32.0f
+#define PLAYER_SPRITE_WIDTH 32
+#define PLAYER_SPRITE_HEIGHT 16
+#define ANIMATION_SPEED 8  // Frames antes de cambiar sprite
+
+// Indices de sprites en el spritesheet
+#define SPRITE_IDLE_1 1
+#define SPRITE_WALK_1 2
+#define SPRITE_WALK_2 3
+#define SPRITE_WALK_2 4
+#define SPRITE_CLIMB_1 7
+#define SPRITE_CLIMB_2 8
+
+// Constantes de los enemigos
+#define MAX_ENEMIES 10
+#define ENEMY_SPEED 2.0f
+#define ENEMY_SIZE 24.0f
+
+// Estructura de datos del servidor
+typedef struct {
+    float x;
+    float y;
+    const char* state;  // "idle", "walking", "climbing", etc.
+} ServerPlayerData;
+
+// Estructura del jugador
+typedef struct {
+    float x;        // Posicion X en pantalla
+    float y;        // Posicion Y en pantalla
+    float size;
+    int spriteIndex;
+    int animCounter;
+} Player;
+
+// Estructura del enemigo
+typedef struct {
+    float x;
+    float y;
+    float velX;
+    float velY;
+    float speed;
+    float size;
+    bool active;
+} Enemy;
+
 // Definicion de variables sobre la ventana
 static SDL_Window *window = NULL;
 static SDL_Renderer *renderer = NULL;
@@ -33,14 +83,106 @@ static MenuOption selectedOption = MENU_START;
 
 // Texturas
 static SDL_Texture *backgroundTexture = NULL;
+static SDL_Texture *playerSpritesheet = NULL;
 
-// Variables del bloque jugador
-static float playerX = 230.0f;
-static float playerY = 200.0f;
-static float playerVelX = 0.0f;
-static float playerVelY = 0.0f;
-static const float PLAYER_SPEED = 3.0f;
-static const float PLAYER_SIZE = 32.0f;
+// Instancia del jugador
+static Player player = {
+    .x = 230.0f,
+    .y = 200.0f,
+    .size = PLAYER_SIZE,
+    .spriteIndex = SPRITE_IDLE_1,
+    .animCounter = 0
+};
+
+// Array de enemigos
+static Enemy enemies[MAX_ENEMIES] = {0};
+static int enemyCount = 0;
+
+// Funcion para generar un enemigo
+void spawnEnemy(float x, float y, float velX, float velY) {
+    // Buscar un slot libre en el array de enemigos
+    for (int i = 0; i < MAX_ENEMIES; i++) {
+        if (!enemies[i].active) {
+            enemies[i].x = x;
+            enemies[i].y = y;
+            enemies[i].velX = velX;
+            enemies[i].velY = velY;
+            enemies[i].speed = ENEMY_SPEED;
+            enemies[i].size = ENEMY_SIZE;
+            enemies[i].active = true;
+            enemyCount++;
+            SDL_Log("Enemigo spawneado en (%.0f, %.0f)", x, y);
+            return;
+        }
+    }
+    SDL_Log("No se puede spawnear enemigo: maximo alcanzado");
+}
+
+// Funcion central para actualizar al jugador desde datos del servidor
+void updatePlayerFromServer(ServerPlayerData* serverData) {
+    // Actualizar posicion directamente desde el servidor
+    player.x = serverData->x;
+    player.y = serverData->y;
+    
+    // Determinar sprite base segun el estado del servidor
+    int baseSprite;
+    bool isMoving = false;
+    
+    if (strcmp(serverData->state, "walking") == 0) {
+        baseSprite = SPRITE_WALK_1;
+        isMoving = true;
+    } else if (strcmp(serverData->state, "climbing") == 0) {
+        baseSprite = SPRITE_CLIMB_1;
+        isMoving = true;
+    } else if (strcmp(serverData->state, "idle") == 0) {
+        baseSprite = SPRITE_IDLE_1;
+        isMoving = false;
+    } else {
+        // Estado desconocido, usar idle por defecto
+        baseSprite = SPRITE_IDLE_1;
+        isMoving = false;
+    }
+    
+    // Actualizar animacion
+    if (isMoving) {
+        player.animCounter++;
+        if (player.animCounter >= ANIMATION_SPEED) {
+            player.animCounter = 0;
+            // Alternar entre frame 1 y 2
+            if (player.spriteIndex == baseSprite) {
+                player.spriteIndex = baseSprite + 1;
+            } else {
+                player.spriteIndex = baseSprite;
+            }
+        }
+        // Si cambiamos de estado, resetear al primer frame
+        if (player.spriteIndex < baseSprite || player.spriteIndex > baseSprite + 1) {
+            player.spriteIndex = baseSprite;
+            player.animCounter = 0;
+        }
+    } else {
+        player.spriteIndex = baseSprite;
+        player.animCounter = 0;
+    }
+}
+
+// Funcion para actualizar enemigos
+void updateEnemies() {
+    for (int i = 0; i < MAX_ENEMIES; i++) {
+        if (enemies[i].active) {
+            // Actualizar posicion
+            enemies[i].x += enemies[i].velX;
+            enemies[i].y += enemies[i].velY;
+
+            // Desactivar enemigos que salen de la pantalla
+            if (enemies[i].x < -enemies[i].size || enemies[i].x > 512 + enemies[i].size ||
+                enemies[i].y < -enemies[i].size || enemies[i].y > 448 + enemies[i].size) {
+                enemies[i].active = false;
+                enemyCount--;
+            }
+        }
+    }
+}
 
 void loadAssets() {
     // Establecer filtro de escalado a nearest neighbor para pixeles nitidos
@@ -60,6 +202,21 @@ void loadAssets() {
         }
     } else {
         SDL_Log("Error al cargar fondo: %s", SDL_GetError());
+    }
+
+    // Cargar spritesheet del jugador
+    SDL_Surface *playerSurface = SDL_LoadBMP("assets/img/dk-jr.bmp");
+    if (playerSurface) {
+        playerSpritesheet = SDL_CreateTextureFromSurface(renderer, playerSurface);
+        SDL_DestroySurface(playerSurface);
+        if (playerSpritesheet) {
+            SDL_SetTextureScaleMode(playerSpritesheet, SDL_SCALEMODE_NEAREST);
+            SDL_Log("Spritesheet del jugador cargado correctamente");
+        } else {
+            SDL_Log("Error al crear textura del spritesheet: %s", SDL_GetError());
+        }
+    } else {
+        SDL_Log("Error al cargar spritesheet: %s", SDL_GetError());
     }
 }
 
@@ -111,9 +268,36 @@ void renderGame() {
     }
 
     // Dibujar el bloque del jugador
-    SDL_FRect playerRect = {playerX, playerY, PLAYER_SIZE, PLAYER_SIZE};
-    SDL_SetRenderDrawColor(renderer, 255, 100, 100, 255);
-    SDL_RenderFillRect(renderer, &playerRect);
+    if (playerSpritesheet) {
+        // Usar el indice de sprite directamente
+        SDL_FRect srcRect = {
+            player.spriteIndex * PLAYER_SPRITE_WIDTH,
+            0,
+            PLAYER_SPRITE_WIDTH,
+            PLAYER_SPRITE_HEIGHT
+        };
+        SDL_FRect dstRect = {
+            player.x,
+            player.y,
+            PLAYER_SPRITE_WIDTH * 2,  // Escalar 2x
+            PLAYER_SPRITE_HEIGHT * 2
+        };
+        SDL_RenderTexture(renderer, playerSpritesheet, &srcRect, &dstRect);
+    } else {
+        // Fallback: dibujar rectangulo si no hay sprite
+        SDL_FRect playerRect = {player.x, player.y, player.size, player.size};
+        SDL_SetRenderDrawColor(renderer, 255, 100, 100, 255);
+        SDL_RenderFillRect(renderer, &playerRect);
+    }
+
+    // Dibujar enemigos
+    SDL_SetRenderDrawColor(renderer, 255, 50, 200, 255);
+    for (int i = 0; i < MAX_ENEMIES; i++) {
+        if (enemies[i].active) {
+            SDL_FRect enemyRect = {enemies[i].x, enemies[i].y, enemies[i].size, enemies[i].size};
+            SDL_RenderFillRect(renderer, &enemyRect);
+        }
+    }
 }
 
 // Funcion principal de renderizado
@@ -160,7 +344,7 @@ void handleMenuInput(SDL_Event *event) {
     }
 }
 
-// Funcion para manejar input del juego
+// Funcion para manejar input del juego (solo envia comandos al servidor)
 void handleGameInput(SDL_Event *event) {
     if (event->type == SDL_EVENT_KEY_DOWN) {
         switch (event->key.key) {
@@ -169,38 +353,47 @@ void handleGameInput(SDL_Event *event) {
                 break;
             case SDLK_W:
             case SDLK_UP:
-                playerVelY = -PLAYER_SPEED;
+                // TODO: Enviar comando "move_up" al servidor
+                SDL_Log("Input: Move Up (enviar al servidor)");
                 break;
             case SDLK_S:
             case SDLK_DOWN:
-                playerVelY = PLAYER_SPEED;
+                // TODO: Enviar comando "move_down" al servidor
+                SDL_Log("Input: Move Down (enviar al servidor)");
                 break;
             case SDLK_A:
             case SDLK_LEFT:
-                playerVelX = -PLAYER_SPEED;
+                // TODO: Enviar comando "move_left" al servidor
+                SDL_Log("Input: Move Left (enviar al servidor)");
                 break;
             case SDLK_D:
             case SDLK_RIGHT:
-                playerVelX = PLAYER_SPEED;
+                // TODO: Enviar comando "move_right" al servidor
+                SDL_Log("Input: Move Right (enviar al servidor)");
+                break;
+            case SDLK_E:
+                // Debug: Spawn enemy
+                {
+                    float spawnX = (float)(rand() % 400 + 50);
+                    float spawnY = 50.0f;
+                    float dirX = (rand() % 2 == 0) ? 1.0f : -1.0f;
+                    float dirY = 1.0f;
+                    spawnEnemy(spawnX, spawnY, dirX * ENEMY_SPEED, dirY * ENEMY_SPEED);
+                }
                 break;
         }
     } else if (event->type == SDL_EVENT_KEY_UP) {
         switch (event->key.key) {
             case SDLK_W:
             case SDLK_UP:
-                if (playerVelY < 0) playerVelY = 0;
-                break;
             case SDLK_S:
             case SDLK_DOWN:
-                if (playerVelY > 0) playerVelY = 0;
-                break;
             case SDLK_A:
             case SDLK_LEFT:
-                if (playerVelX < 0) playerVelX = 0;
-                break;
             case SDLK_D:
             case SDLK_RIGHT:
-                if (playerVelX > 0) playerVelX = 0;
+                // TODO: Enviar comando "stop" al servidor
+                SDL_Log("Input: Stop (enviar al servidor)");
                 break;
         }
     }
@@ -233,20 +426,27 @@ void handleEvents(bool *running) {
 void update() {
     // Solo actualizar si estamos jugando
     if (gameState == GAME_STATE_PLAYING) {
-        // Actualizar posicion del jugador
-        playerX += playerVelX;
-        playerY += playerVelY;
+        // TODO: Recibir datos del servidor
+        // Por ahora, simulamos datos del servidor para testing local
+        ServerPlayerData serverData = {
+            .x = player.x,  // Mantener posicion actual (sera reemplazado por datos del servidor)
+            .y = player.y,
+            .state = "idle"  // Estado por defecto (sera reemplazado por datos del servidor)
+        };
+        
+        // Actualizar jugador con datos del servidor
+        updatePlayerFromServer(&serverData);
 
-        // Mantener al jugador dentro de los limites
-        if (playerX < 0) playerX = 0;
-        if (playerY < 0) playerY = 0;
-        if (playerX > 512 - PLAYER_SIZE) playerX = 512 - PLAYER_SIZE;
-        if (playerY > 448 - PLAYER_SIZE) playerY = 448 - PLAYER_SIZE;
+        // Actualizar enemigos
+        updateEnemies();
     }
 }
 
 int main(int argc, char *argv[]) {
     bool running = true;
+
+    // Inicializar generador de numeros aleatorios
+    srand((unsigned int)time(NULL));
 
     // Metadata de la aplicacion
     SDL_SetAppMetadata("DonCE Kong Jr", "1.0", "com.tec.donce-kong-jr");
@@ -286,6 +486,9 @@ int main(int argc, char *argv[]) {
     // Limpieza
     if (backgroundTexture) {
         SDL_DestroyTexture(backgroundTexture);
+    }
+    if (playerSpritesheet) {
+        SDL_DestroyTexture(playerSpritesheet);
     }
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
