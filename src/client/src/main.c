@@ -51,6 +51,12 @@ int main(int argc, char *argv[]) {
     SDL_Renderer* renderer = NULL;
     if (!SDL_CreateWindowAndRenderer("DonCE Kong Jr", 512, 448, SDL_WINDOW_RESIZABLE, &window, &renderer)) {
         SDL_Log("No se pudo crear la ventana/renderer: %s", SDL_GetError());
+        SDL_Quit();
+        return 1;
+    }
+
+    SDL_SetRenderLogicalPresentation(renderer, 512, 448, SDL_LOGICAL_PRESENTATION_LETTERBOX);
+
     loadAssets(renderer);
 
     // TODO: Conectar al servidor Java
@@ -58,12 +64,6 @@ int main(int argc, char *argv[]) {
     if (!connectToServer("127.0.0.1", 2021)) {
         SDL_Log("No se pudo conectar al servidor. Continuando en modo local...");
     }
-
-    // Loop principal del juego
-
-    SDL_SetRenderLogicalPresentation(renderer, 512, 448, SDL_LOGICAL_PRESENTATION_LETTERBOX);
-
-    loadAssets(renderer);
 
     // Loop principal del juego
     while (running) {
@@ -74,15 +74,15 @@ int main(int argc, char *argv[]) {
         update();
 
         // Renderizar
+        render(renderer);
+
+        // Limitar a ~30 FPS
+        SDL_Delay(32);
+    }
+
     // Limpieza
     cleanupAssets();
     cleanupNetwork();
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
-
-    return 0;
-}   cleanupAssets();
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
