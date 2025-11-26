@@ -3,7 +3,7 @@
 
 ---
 
-## Semana 1 - [15 de Noviembre - En curso]
+## Semana 1 - [10 de Noviembre - 16 de Noviembre]
 
 ### Tareas Asignadas
 - [x] Configurar entorno de desarrollo con SDL3
@@ -51,75 +51,226 @@
 
 ---
 
-#### [Día/Fecha]
-**Horas trabajadas:** X horas
-
-**Actividades realizadas:**
-- 
-
-**Problemas encontrados:**
-- 
-
-**Soluciones implementadas:**
-- 
-
-**Aprendizajes:**
-- 
-
-**Pendientes para siguiente sesión:**
-- 
-
----
-
-## Semana 2 - [Fecha Inicio - Fecha Fin]
+## Semana 2 - [17 de Noviembre - 23 de Noviembre]
 
 ### Tareas Asignadas
-- [ ] Tarea 1
-- [ ] Tarea 2
+- [x] Implementar renderizado de sprites
+- [x] Crear menú principal
+- [x] Agregar imagen de fondo
+- [x] Implementar movimiento del jugador
+- [x] Agregar animaciones del jugador
+- [ ] Implementar lógica de enemigos
 
 ### Progreso Diario
 
-#### [Día/Fecha]
-**Horas trabajadas:** X horas
+#### Martes 19 de Noviembre, 2025
+**Horas trabajadas:** ~4 horas
 
 **Actividades realizadas:**
-- 
+- Implementación del menú principal con opciones interactivas
+- Sistema de navegación por teclado (flechas arriba/abajo, Enter para seleccionar)
+- Agregada imagen de fondo del nivel (bg.bmp - 58KB)
+- Implementación de jugador movible con controles WASD
+- Sistema básico de colisión y límites de pantalla
+- Renderizado de sprites BMP con SDL_LoadBMP y SDL_CreateTextureFromSurface
 
 **Problemas encontrados:**
-- 
+- Gestión manual de memoria con SDL_FreeSurface después de crear texturas
+- Coordenadas del jugador necesitaban limitarse a los bordes de la pantalla
+- Integración del menú con el estado del juego
 
 **Soluciones implementadas:**
-- 
+- Implementación de enum para estados del juego (MENU, PLAYING, GAME_OVER)
+- Sistema de máquina de estados para transiciones
+- Liberación correcta de recursos SDL después de crear texturas
+- Clamp de posición del jugador usando condicionales
 
 **Aprendizajes:**
-- 
+- SDL_LoadBMP es útil para cargar imágenes BMP sin dependencias adicionales
+- Importancia de gestión de memoria en C (FreeSurface después de CreateTexture)
+- Uso de enums para manejar estados del juego de forma limpia
+- Renderizado de texto básico usando rectángulos coloreados como placeholders
 
 **Pendientes para siguiente sesión:**
-- 
+- Agregar más sprites de personajes
+- Implementar sistema de animación
+- Preparar arquitectura para comunicación con servidor
+
+---
+
+#### Sábado 23 de Noviembre, 2025
+**Horas trabajadas:** ~2 horas
+
+**Actividades realizadas:**
+- Actualización del To Do List con tareas pendientes
+- Revisión de arquitectura del proyecto
+- Planificación de modularización del código
+
+**Pendientes para siguiente sesión:**
+- Refactorizar código en módulos separados
+- Agregar todos los sprites del juego
+- Implementar sistema de animación completo
+
+---
+
+## Semana 3 - [24 de Noviembre - 30 de Noviembre]
+
+### Tareas Asignadas
+- [x] Refactorizar y modularizar el proyecto
+- [x] Agregar todos los sprites del juego
+- [x] Implementar sistema de animación del jugador
+- [x] Crear módulo de networking con sockets
+- [x] Inicializar comunicación básica con servidor
+- [ ] Implementar protocolo de comunicación completo
+- [ ] Sincronizar estado del juego entre cliente y servidor
+
+### Progreso Diario
+
+#### Lunes 25 de Noviembre, 2025
+**Horas trabajadas:** ~6 horas
+
+**Actividades realizadas:**
+**Sesión Tarde (16:42 - 16:58):**
+- Agregados todos los sprites del juego (11 archivos BMP):
+  - Personajes: dk-jr.bmp (28KB), dk.bmp (24KB), mario.bmp (5KB)
+  - Enemigos: gator-blue.bmp, gator-red.bmp (2KB c/u)
+  - Objetos: cage.bmp, fruit.bmp, life-icon.bmp, point-tally.bmp, points.bmp
+- Agregada fuente kongtext.ttf (10KB) para UI
+- Implementación de sistema de animación por frames para el jugador
+- 4 estados de animación: idle, corriendo, saltando, escalando
+- Sistema de spritesheet con SDL_Rect para selección de frames
+- Timer de animación para controlar velocidad de frames
+
+**Sesión Noche (20:35 - 21:04):**
+- Refactorización completa del proyecto en arquitectura modular
+- Creación de 10 módulos separados (.h/.c):
+  - `assets.c/h`: Gestión de carga de recursos
+  - `player.c/h`: Lógica y renderizado del jugador
+  - `enemy.c/h`: Sistema de enemigos
+  - `game_state.c/h`: Estado global del juego
+  - `game_logic.c/h`: Lógica principal del juego
+  - `input.c/h`: Manejo de entrada del teclado
+  - `renderer.c/h`: Sistema de renderizado
+  - `network.c/h`: Comunicación por sockets
+- Implementación del módulo de networking:
+  - Inicialización de Winsock2 (WSAStartup)
+  - Creación de socket TCP (AF_INET, SOCK_STREAM)
+  - Función de conexión al servidor
+  - Funciones send/receive básicas
+  - Manejo de errores con WSAGetLastError()
+- Actualización de CMakeLists.txt para compilar todos los módulos
+- Enlace con biblioteca ws2_32 para sockets en Windows
+- Corrección de inicialización de socket en main.c
+- Integración del sistema de red con el game loop
+
+**Problemas encontrados:**
+- Código monolítico en main.c (~500 líneas) difícil de mantener
+- Falta de separación de responsabilidades
+- Inicialización incorrecta de sockets (faltaba WSAStartup antes de socket())
+- Error de compilación por falta de enlace con ws2_32.lib
+- Gestión de memoria compleja con múltiples recursos SDL
+
+**Soluciones implementadas:**
+- Arquitectura modular con separación clara de responsabilidades
+- main.c reducido a ~77 líneas (solo inicialización y game loop)
+- Cada módulo con responsabilidad única y bien definida
+- CMakeLists.txt actualizado con todos los archivos fuente
+- Agregado `-lws2_32` a las opciones de enlace
+- Corrección del orden de inicialización: WSAStartup → socket() → connect()
+- Sistema de asset manager para centralizar carga de recursos
+- Structs bien definidas para Player, Enemy, GameState
+
+**Aprendizajes:**
+- Arquitectura modular en C requiere cuidadosa gestión de headers y dependencias
+- Winsock2 requiere inicialización explícita antes de usar sockets
+- CMake necesita listar explícitamente todos los archivos fuente
+- Importancia de separar lógica de presentación desde el inicio
+- Sockets en Windows requieren enlazar con ws2_32
+- SDL_Rect permite implementar spritesheets de forma eficiente
+- Forward declarations en headers previenen dependencias circulares
+
+**Pendientes para siguiente sesión:**
+- Implementar protocolo de comunicación cliente-servidor
+- Definir estructura de mensajes (handshake, input, estado)
+- Sincronizar posición del jugador con el servidor
+- Implementar lógica de enemigos
+- Sistema de colisiones completo
+- Manejo de desconexión y reconexión
 
 ---
 
 ## Resumen General del Proyecto
 
+### Componentes Desarrollados
+- **Cliente (C con SDL3):** 
+  - Sistema de renderizado con ventana 512x448
+  - Arquitectura modular (10 módulos)
+  - Sistema de animación por frames
+  - Manejo de input con teclado
+  - Módulo de networking con Winsock2
+  - Menú principal funcional
+  - Movimiento y animación del jugador
+
+- **Servidor (Java):** En desarrollo
+- **Manager (C):** Pendiente
+
 ### Tecnologías y Librerías Utilizadas
-- 
-- 
-- 
+- **SDL3**: Renderizado gráfico, manejo de ventanas, eventos, texturas
+- **Winsock2**: Comunicación por sockets TCP en Windows
+- **CMake**: Sistema de build con MinGW-x64
+- **GCC**: Compilador C (MinGW)
+- **Git**: Control de versiones
+
+### Arquitectura del Cliente
+**Módulos implementados:**
+1. `main.c` - Punto de entrada y game loop principal
+2. `assets.c/h` - Gestión de recursos (imágenes, fuentes)
+3. `player.c/h` - Lógica del jugador y animaciones
+4. `enemy.c/h` - Sistema de enemigos
+5. `game_state.c/h` - Estado global del juego
+6. `game_logic.c/h` - Lógica principal del juego
+7. `input.c/h` - Procesamiento de entrada
+8. `renderer.c/h` - Sistema de renderizado
+9. `network.c/h` - Comunicación cliente-servidor
 
 ### Desafíos Principales
-1. 
-2. 
-3. 
+1. **Configuración del entorno de desarrollo**: Migración de Visual Studio a MinGW-x64, limpieza de archivos de configuración conflictivos
+2. **Gestión de memoria en C**: Correcta liberación de superficies y texturas SDL
+3. **Arquitectura modular**: Refactorización de código monolítico a sistema modular con dependencias claras
+4. **Networking en Windows**: Inicialización correcta de Winsock2 y gestión de sockets
+5. **Sistema de animación**: Implementación de spritesheets y control de frames
 
 ### Logros Destacados
-1. 
-2. 
-3. 
+1. ✅ Entorno de desarrollo completamente funcional con SDL3 y CMake
+2. ✅ Sistema de renderizado con presentación lógica y letterboxing
+3. ✅ Arquitectura modular bien estructurada (main.c reducido de 500 a 77 líneas)
+4. ✅ Sistema de animación por frames funcional
+5. ✅ Módulo de networking básico implementado
+6. ✅ Todos los sprites del juego integrados (11 archivos)
+7. ✅ Menú principal con navegación por teclado
 
 ### Conclusiones y Reflexiones
-- 
+- La modularización temprana es crucial para mantener el código manejable en proyectos C
+- SDL3 ofrece una API limpia y potente para desarrollo de juegos 2D
+- La gestión manual de memoria en C requiere disciplina y atención constante
+- Windows requiere configuración específica para networking (Winsock2, ws2_32.lib)
+- La separación de responsabilidades facilita enormemente el debugging y mantenimiento
+- El uso de CMake con MinGW proporciona un flujo de trabajo consistente
+- La implementación de sistemas de estado simplifica el manejo de la lógica del juego
+
+### Próximos Pasos
+1. Implementar protocolo de comunicación cliente-servidor
+2. Desarrollar servidor en Java con manejo de múltiples clientes
+3. Sincronizar estado del juego entre cliente y servidor
+4. Implementar lógica completa de enemigos y colisiones
+5. Agregar sistema de puntuación y vidas
+6. Implementar niveles del juego
+7. Añadir efectos de sonido y música
 
 ---
 
 ## Notas Adicionales
-- 
+- **Total de commits hasta 25/11/2025:** 9 commits en rama franco-develop
+- **Líneas de código:** ~1,500+ líneas (distribuidas en 10 módulos)
+- **Assets:** 11 sprites BMP + 1 fuente TTF
+- **Tamaño del ejecutable:** ~224 KB (main.exe)
