@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
     loadAssets(renderer);
 
     // Conectar al servidor Java
-    if (!connectToServer("localhost", 2021)) {
+    if (!connectToServer("localhost", 2121)) {
         SDL_Log("No se pudo conectar al servidor. Continuando en modo local...");
     }
 
