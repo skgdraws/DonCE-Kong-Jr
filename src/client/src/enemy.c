@@ -32,19 +32,22 @@ void spawnEnemy(float x, float y, float velX, float velY) {
     SDL_Log("No se puede spawnear enemigo: maximo alcanzado");
 }
 
-void updateEnemies(void) {
+void updateEnemiesFromServer(ServerEnemyData* serverEnemies, int count) {
+    // Desactivar todos los enemigos primero
     for (int i = 0; i < MAX_ENEMIES; i++) {
-        if (enemies[i].active) {
-            // Actualizar posicion
-            enemies[i].x += enemies[i].velX;
-            enemies[i].y += enemies[i].velY;
-
-            // Desactivar enemigos que salen de la pantalla
-            if (enemies[i].x < -enemies[i].size || enemies[i].x > 512 + enemies[i].size ||
-                enemies[i].y < -enemies[i].size || enemies[i].y > 448 + enemies[i].size) {
-                enemies[i].active = false;
-                enemyCount--;
-            }
+        enemies[i].active = false;
+    }
+    
+    enemyCount = 0;
+    
+    // Actualizar con datos del servidor
+    for (int i = 0; i < count && i < MAX_ENEMIES; i++) {
+        if (serverEnemies[i].active) {
+            enemies[i].x = serverEnemies[i].x;
+            enemies[i].y = serverEnemies[i].y;
+            enemies[i].size = ENEMY_SIZE;
+            enemies[i].active = true;
+            enemyCount++;
         }
     }
 }

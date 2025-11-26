@@ -42,14 +42,17 @@
 - [x] Separate rendering into functions (renderMenu, renderGame, render)
 
 ## 🎮 Gameplay
-- [x] Create player block/entity
-- [x] Implement basic movement (WASD/Arrow keys)
+- [x] Create player entity with struct
+- [x] Implement server-controlled player movement
 - [x] Add collision with screen boundaries
 - [x] Separate game logic into update function
-- [ ] Add sprite/texture for player character
+- [x] Add player spritesheet with animations
+- [x] Implement sprite index-based animation system
+- [x] Encapsulate player attributes in struct
+- [x] Enemy spawning system (debug mode with E key)
 - [ ] Implement jumping mechanics
 - [ ] Add platforms/level geometry
-- [ ] Implement enemy entities
+- [ ] Implement collision detection (player-enemy)
 
 ## 🔊 Audio for Menu
 - [ ] Initialize SDL audio system
@@ -59,26 +62,45 @@
 - [ ] Add volume control (music and SFX)
 
 ## 🔧 Code Structure
-- [ ] Create header files:
-  - [ ] `window.h` - Window management
-  - [ ] `menu.h` - Menu system
-  - [ ] `renderer.h` - Rendering utilities
-  - [ ] `audio.h` - Audio system
-  - [ ] `player.h` - Player logic
-  - [ ] `game.h` - Game state management
-- [ ] Split code into multiple source files
+- [x] Create header files:
+  - [x] `game_state.h` - Game state management
+  - [x] `player.h` - Player logic
+  - [x] `enemy.h` - Enemy system
+  - [x] `assets.h` - Asset loading/management
+  - [x] `renderer.h` - Rendering utilities
+  - [x] `input.h` - Input handling
+  - [x] `game_logic.h` - Game update logic
+  - [x] `network.h` - Socket communication
+- [x] Split code into modular source files
 - [x] Add proper error handling
 - [x] Add logging/debug output
 - [x] Organize functions (render, update, input handling)
+- [x] Add Doxygen-style documentation to all headers
+
+## 🌐 Networking
+- [x] Initialize Winsock2 for Windows
+- [x] Create TCP socket connection
+- [x] Implement connectToServer() with hostname resolution
+- [x] Add non-blocking socket I/O
+- [x] Implement sendToServer() function
+- [x] Implement receiveFromServer() function
+- [x] Add connection status tracking
+- [x] Connect to Java server (localhost:2021)
+- [ ] Implement message protocol (send/receive player commands)
+- [ ] Handle server disconnection gracefully
+- [ ] Add reconnection logic
 
 ## 📦 Build & Assets
 - [x] Set up CMake build system
 - [x] Configure SDL3 library linking (MinGW)
+- [x] Link Winsock2 library for networking
 - [x] Create VS Code build tasks
 - [x] Configure nearest neighbor texture filtering
+- [x] Add all source files to CMakeLists.txt
 - [x] Organize asset directories:
-  - [ ] Add placeholder font file to `assets/font/`
+  - [x] Add font file to `assets/font/`
   - [x] Add background graphic to `assets/img/`
+  - [x] Add player spritesheet (dk-jr.bmp) to `assets/img/`
   - [ ] Add menu sounds to `assets/sound/`
 
 ---
@@ -89,14 +111,20 @@
 - ✅ Basic main menu with navigation (3 options)
 - ✅ Game state system (Menu/Playing/Quit)
 - ✅ Background image loading and rendering
-- ✅ Player movement with keyboard controls
-- ✅ Code organization (separate render/update/input functions)
+- ✅ Server-controlled player system with updatePlayerFromServer()
+- ✅ Player sprite animations (IDLE, WALK, CLIMB)
+- ✅ Enemy spawning and management system
+- ✅ Code organization into 8 modular files
+- ✅ TCP socket networking with Java server
+- ✅ Hostname resolution (localhost support)
+- ✅ Doxygen documentation for all APIs
 
 **Priority Tasks:**
-1. Add text rendering for menu labels
-2. Implement player sprite/texture
-3. Add basic level geometry (platforms)
+1. Implement server communication protocol (send input, receive game state)
+2. Add text rendering for menu labels
+3. Add platforms/level geometry
 4. Implement jumping mechanics
+5. Add player-enemy collision detection
 
 **Notes:**
 - SDL3 development package located at: `D:\Libraries\SDL3-3.2.26-mingw`

@@ -9,6 +9,12 @@ set(SDL3_DIR "D:/Libraries/SDL3-3.2.26-mingw")
 set(SDL3_INCLUDE_DIR "${SDL3_DIR}/x86_64-w64-mingw32/include")
 set(SDL3_LIBRARY "${SDL3_DIR}/x86_64-w64-mingw32/lib/libSDL3.dll.a")
 
+# Set SDL3_ttf paths
+set(SDL3_TTF_DIR "D:/Libraries/SDL3_ttf-3.2.2")
+set(SDL3_TTF_INCLUDE_DIR "${SDL3_TTF_DIR}/x86_64-w64-mingw32/include")
+set(SDL3_TTF_LIBRARY "${SDL3_TTF_DIR}/x86_64-w64-mingw32/lib/libSDL3_ttf.dll.a")
+set(SDL3_TTF_DLL "${SDL3_TTF_DIR}/x86_64-w64-mingw32/bin/SDL3_ttf.dll")
+
 # Add executable
 add_executable(main 
     src/main.c
@@ -23,10 +29,10 @@ add_executable(main
 )
 
 # Include SDL3 headers
-target_include_directories(main PRIVATE ${SDL3_INCLUDE_DIR})
+target_include_directories(main PRIVATE ${SDL3_INCLUDE_DIR} ${SDL3_TTF_INCLUDE_DIR})
 
 # Link SDL3 library
-target_link_libraries(main ${SDL3_LIBRARY})
+target_link_libraries(main ${SDL3_LIBRARY} ${SDL3_TTF_LIBRARY})
 
 # Link Winsock2 for Windows networking
 if(WIN32)
@@ -37,6 +43,12 @@ endif()
 add_custom_command(TARGET main POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     ${SDL3_DIR}/x86_64-w64-mingw32/bin/SDL3.dll
+    ${CMAKE_CURRENT_SOURCE_DIR})
+
+# Copy SDL3_ttf.dll to project root directory
+add_custom_command(TARGET main POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${SDL3_TTF_DLL}
     ${CMAKE_CURRENT_SOURCE_DIR})
 
 message(STATUS "Using SDL3 from: ${SDL3_DIR}")

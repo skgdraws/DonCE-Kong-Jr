@@ -22,6 +22,16 @@ typedef struct {
 } Enemy;
 
 /**
+ * @brief Estructura de datos de enemigo recibida del servidor
+ */
+typedef struct {
+    float x;        ///< Posicion X del enemigo
+    float y;        ///< Posicion Y del enemigo
+    int id;         ///< Identificador unico del enemigo
+    bool active;    ///< Estado de activacion del enemigo
+} ServerEnemyData;
+
+/**
  * @brief Genera un nuevo enemigo en la posicion especificada
  * @param x Posicion inicial X
  * @param y Posicion inicial Y
@@ -31,9 +41,11 @@ typedef struct {
 void spawnEnemy(float x, float y, float velX, float velY);
 
 /**
- * @brief Actualiza la posicion y estado de todos los enemigos activos
+ * @brief Actualiza los enemigos con datos recibidos del servidor
+ * @param serverEnemies Array de datos de enemigos del servidor
+ * @param count Numero de enemigos en el array
  */
-void updateEnemies(void);
+void updateEnemiesFromServer(ServerEnemyData* serverEnemies, int count);
 
 /**
  * @brief Obtiene el array de enemigos

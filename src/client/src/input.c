@@ -17,11 +17,16 @@ void handleMenuInput(SDL_Event* event) {
             case SDLK_SPACE:
                 switch (selectedOption) {
                     case MENU_START:
-                        gameState = GAME_STATE_PLAYING;
-                        SDL_Log("Iniciando juego...");
+                        gameState = GAME_STATE_CONNECTING;
+                        SDL_Log("Conectando al servidor...");
                         break;
-                    case MENU_OPTIONS:
-                        SDL_Log("Opciones - Proximamente");
+                    case MENU_SPECTATE:
+                        gameState = GAME_STATE_SPECTATE;
+                        SDL_Log("Menu de espectacion");
+                        break;
+                    case MENU_CREDITS:
+                        gameState = GAME_STATE_CREDITS;
+                        SDL_Log("Mostrando creditos");
                         break;
                     case MENU_EXIT:
                         gameState = GAME_STATE_QUIT;
@@ -62,14 +67,9 @@ void handleGameInput(SDL_Event* event) {
                 SDL_Log("Input: Move Right (enviar al servidor)");
                 break;
             case SDLK_E:
-                // Debug: Spawn enemy
-                {
-                    float spawnX = (float)(rand() % 400 + 50);
-                    float spawnY = 50.0f;
-                    float dirX = (rand() % 2 == 0) ? 1.0f : -1.0f;
-                    float dirY = 1.0f;
-                    spawnEnemy(spawnX, spawnY, dirX * ENEMY_SPEED, dirY * ENEMY_SPEED);
-                }
+                // Debug: Solicitar spawn de enemigo al servidor
+                // TODO: Enviar comando "spawn_enemy" al servidor
+                SDL_Log("Input: Spawn Enemy (enviar al servidor)");
                 break;
         }
     } else if (event->type == SDL_EVENT_KEY_UP) {
@@ -89,6 +89,45 @@ void handleGameInput(SDL_Event* event) {
     }
 }
 
+void handleSpectateMenuInput(SDL_Event* event) {
+    if (event->type == SDL_EVENT_KEY_DOWN) {
+        switch (event->key.key) {
+            case SDLK_ESCAPE:
+            case SDLK_RETURN:
+                gameState = GAME_STATE_MENU;
+                break;
+        }
+    }
+}
+
+void handleCreditsInput(SDL_Event* event) {
+    if (event->type == SDL_EVENT_KEY_DOWN) {
+        switch (event->key.key) {
+            case SDLK_ESCAPE:
+            case SDLK_RETURN:
+            case SDLK_SPACE:
+                gameState = GAME_STATE_MENU;
+                break;
+        }
+    }
+}
+
+void handleConnectingInput(SDL_Event* event) {
+    if (event->type == SDL_EVENT_KEY_DOWN) {
+        if (event->key.key == SDLK_ESCAPE) {
+            gameState = GAME_STATE_MENU;
+        }
+    }
+}
+
+void handleSpectatingInput(SDL_Event* event) {
+    if (event->type == SDL_EVENT_KEY_DOWN) {
+        if (event->key.key == SDLK_ESCAPE) {
+            gameState = GAME_STATE_MENU;
+        }
+    }
+}
+
 void handleEvents(bool* running) {
     SDL_Event event;
     
@@ -98,10 +137,27 @@ void handleEvents(bool* running) {
             return;
         }
 
-        if (gameState == GAME_STATE_MENU) {
-            handleMenuInput(&event);
-        } else if (gameState == GAME_STATE_PLAYING) {
-            handleGameInput(&event);
+        switch (gameState) {
+            case GAME_STATE_MENU:
+                handleMenuInput(&event);
+                break;
+            case GAME_STATE_SPECTATE:
+                handleSpectateMenuInput(&event);
+                break;
+            case GAME_STATE_CREDITS:
+                handleCreditsInput(&event);
+                break;
+            case GAME_STATE_CONNECTING:
+                handleConnectingInput(&event);
+                break;
+            case GAME_STATE_PLAYING:
+                handleGameInput(&event);
+                break;
+            case GAME_STATE_SPECTATING:
+                handleSpectatingInput(&event);
+                break;
+            case GAME_STATE_QUIT:
+                break;
         }
     }
 
