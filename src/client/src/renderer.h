@@ -3,13 +3,28 @@
 
 #include <SDL3/SDL.h>
 
-// Funcion principal de renderizado
+/**
+ * @brief Funcion principal de renderizado del juego
+ * 
+ * Determina que renderizar basado en el estado actual del juego.
+ * 
+ * @param renderer Puntero al renderer de SDL
+ */
 void render(SDL_Renderer* renderer);
 
-// Funcion para renderizar el menu
+/**
+ * @brief Renderiza el menu principal
+ * @param renderer Puntero al renderer de SDL
+ */
 void renderMenu(SDL_Renderer* renderer);
 
-// Funcion para renderizar el juego
+/**
+ * @brief Renderiza la pantalla de juego
+ * 
+ * Dibuja el fondo, jugador, enemigos y otros elementos del juego.
+ * 
+ * @param renderer Puntero al renderer de SDL
+ */
 void renderGame(SDL_Renderer* renderer);
 
 #endif // RENDERER_H

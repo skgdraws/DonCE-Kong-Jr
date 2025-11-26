@@ -3,14 +3,27 @@
 
 #include <SDL3/SDL.h>
 
-// Funcion para cargar assets
+/**
+ * @brief Carga todos los assets del juego (texturas, sprites)
+ * @param renderer Puntero al renderer de SDL para crear las texturas
+ */
 void loadAssets(SDL_Renderer* renderer);
 
-// Funcion para liberar assets
+/**
+ * @brief Libera todos los assets cargados de la memoria
+ */
 void cleanupAssets(void);
 
-// Obtener texturas
+/**
+ * @brief Obtiene la textura del fondo
+ * @return Puntero a la textura del fondo, o NULL si no esta cargada
+ */
 SDL_Texture* getBackgroundTexture(void);
+
+/**
+ * @brief Obtiene el spritesheet del jugador
+ * @return Puntero al spritesheet del jugador, o NULL si no esta cargado
+ */
 SDL_Texture* getPlayerSpritesheet(void);
 
 #endif // ASSETS_H

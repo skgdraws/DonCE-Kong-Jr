@@ -4,36 +4,66 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-// Estructura de conexion de red
+/**
+ * @brief Estructura que contiene informacion de la conexion de red
+ */
 typedef struct {
-    int sockfd;
-    bool connected;
-    char serverAddress[256];
-    int serverPort;
+    int sockfd;                 ///< Descriptor del socket
+    bool connected;             ///< Estado de conexion
+    char serverAddress[256];    ///< Direccion IP del servidor
+    int serverPort;             ///< Puerto del servidor
 } NetworkConnection;
 
-// Inicializar el sistema de red
+/**
+ * @brief Inicializa el sistema de red (Winsock en Windows)
+ * @return true si la inicializacion fue exitosa, false en caso contrario
+ */
 bool initNetwork(void);
 
-// Conectar al servidor Java
+/**
+ * @brief Conecta al servidor Java via TCP
+ * @param address Direccion IP del servidor (ej: "127.0.0.1")
+ * @param port Puerto del servidor
+ * @return true si la conexion fue exitosa, false en caso contrario
+ */
 bool connectToServer(const char* address, int port);
 
-// Desconectar del servidor
+/**
+ * @brief Cierra la conexion con el servidor
+ */
 void disconnectFromServer(void);
 
-// Enviar datos al servidor
+/**
+ * @brief Envia datos al servidor
+ * @param data Puntero a los datos a enviar
+ * @param length Longitud de los datos en bytes
+ * @return true si el envio fue exitoso, false en caso contrario
+ */
 bool sendToServer(const char* data, size_t length);
 
-// Recibir datos del servidor (no bloqueante)
+/**
+ * @brief Recibe datos del servidor (operacion no bloqueante)
+ * @param buffer Buffer donde almacenar los datos recibidos
+ * @param bufferSize Tamaño del buffer
+ * @return Numero de bytes recibidos, 0 si no hay datos, -1 en caso de error
+ */
 int receiveFromServer(char* buffer, size_t bufferSize);
 
-// Verificar si esta conectado
+/**
+ * @brief Verifica si hay una conexion activa con el servidor
+ * @return true si esta conectado, false en caso contrario
+ */
 bool isConnected(void);
 
-// Limpiar recursos de red
+/**
+ * @brief Libera recursos de red y limpia el sistema
+ */
 void cleanupNetwork(void);
 
-// Obtener informacion de conexion
+/**
+ * @brief Obtiene la informacion de la conexion actual
+ * @return Puntero a la estructura de conexion
+ */
 NetworkConnection* getNetworkConnection(void);
 
 #endif // NETWORK_H

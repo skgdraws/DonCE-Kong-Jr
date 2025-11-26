@@ -17,26 +17,40 @@
 #define SPRITE_CLIMB_1 7
 #define SPRITE_CLIMB_2 8
 
-// Estructura de datos del servidor
+/**
+ * @brief Estructura con datos del jugador enviados por el servidor
+ */
 typedef struct {
-    float x;
-    float y;
-    const char* state;  // "idle", "walking", "climbing", etc.
+    float x;              ///< Posicion X del jugador
+    float y;              ///< Posicion Y del jugador
+    const char* state;    ///< Estado del jugador ("idle", "walking", "climbing")
 } ServerPlayerData;
 
-// Estructura del jugador
+/**
+ * @brief Estructura que representa al jugador
+ */
 typedef struct {
-    float x;
-    float y;
-    float size;
-    int spriteIndex;
-    int animCounter;
+    float x;            ///< Posicion X en pantalla
+    float y;            ///< Posicion Y en pantalla
+    float size;         ///< Tamaño para colisiones
+    int spriteIndex;    ///< Indice del sprite actual
+    int animCounter;    ///< Contador de frames de animacion
 } Player;
 
-// Funcion para actualizar jugador desde datos del servidor
+/**
+ * @brief Actualiza el jugador basado en datos recibidos del servidor
+ * 
+ * Esta funcion es la autoridad central para el estado del jugador.
+ * Sincroniza posicion y animaciones con el servidor.
+ * 
+ * @param serverData Puntero a los datos del servidor
+ */
 void updatePlayerFromServer(ServerPlayerData* serverData);
 
-// Obtener instancia del jugador
+/**
+ * @brief Obtiene la instancia del jugador
+ * @return Puntero a la estructura del jugador
+ */
 Player* getPlayer(void);
 
 #endif // PLAYER_H

@@ -1,7 +1,12 @@
 #ifndef GAME_LOGIC_H
 #define GAME_LOGIC_H
 
-// Funcion para actualizar la logica del juego
+/**
+ * @brief Actualiza la logica del juego en cada frame
+ * 
+ * Esta funcion se encarga de actualizar el estado del jugador,
+ * enemigos, y sincronizar con el servidor.
+ */
 void update(void);
 
 #endif // GAME_LOGIC_H

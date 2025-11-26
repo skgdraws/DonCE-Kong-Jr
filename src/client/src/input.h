@@ -4,13 +4,25 @@
 #include <SDL3/SDL.h>
 #include <stdbool.h>
 
-// Funcion para procesar eventos
+/**
+ * @brief Procesa todos los eventos de entrada pendientes
+ * @param running Puntero al flag de ejecucion del juego
+ */
 void handleEvents(bool* running);
 
-// Funcion para manejar input del menu
+/**
+ * @brief Maneja la entrada del usuario en el menu
+ * @param event Evento de SDL a procesar
+ */
 void handleMenuInput(SDL_Event* event);
 
-// Funcion para manejar input del juego
+/**
+ * @brief Maneja la entrada del usuario durante el juego
+ * 
+ * Envia comandos al servidor basados en la entrada del usuario.
+ * 
+ * @param event Evento de SDL a procesar
+ */
 void handleGameInput(SDL_Event* event);
 
 #endif // INPUT_H

@@ -8,27 +8,43 @@
 #define ENEMY_SPEED 2.0f
 #define ENEMY_SIZE 24.0f
 
-// Estructura del enemigo
+/**
+ * @brief Estructura que representa un enemigo en el juego
+ */
 typedef struct {
-    float x;
-    float y;
-    float velX;
-    float velY;
-    float speed;
-    float size;
-    bool active;
+    float x;        ///< Posicion X del enemigo
+    float y;        ///< Posicion Y del enemigo
+    float velX;     ///< Velocidad horizontal
+    float velY;     ///< Velocidad vertical
+    float speed;    ///< Velocidad base del enemigo
+    float size;     ///< Tamaño del enemigo para colisiones
+    bool active;    ///< Estado de activacion del enemigo
 } Enemy;
 
-// Funcion para generar un enemigo
+/**
+ * @brief Genera un nuevo enemigo en la posicion especificada
+ * @param x Posicion inicial X
+ * @param y Posicion inicial Y
+ * @param velX Velocidad horizontal inicial
+ * @param velY Velocidad vertical inicial
+ */
 void spawnEnemy(float x, float y, float velX, float velY);
 
-// Funcion para actualizar enemigos
+/**
+ * @brief Actualiza la posicion y estado de todos los enemigos activos
+ */
 void updateEnemies(void);
 
-// Obtener array de enemigos
+/**
+ * @brief Obtiene el array de enemigos
+ * @return Puntero al array de enemigos
+ */
 Enemy* getEnemies(void);
 
-// Obtener contador de enemigos
+/**
+ * @brief Obtiene el numero de enemigos activos
+ * @return Cantidad de enemigos actualmente activos
+ */
 int getEnemyCount(void);
 
 #endif // ENEMY_H
