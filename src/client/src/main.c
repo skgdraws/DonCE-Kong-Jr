@@ -59,9 +59,8 @@ int main(int argc, char *argv[]) {
 
     loadAssets(renderer);
 
-    // TODO: Conectar al servidor Java
-    // Descomentar cuando el servidor este listo:
-    if (!connectToServer("127.0.0.1", 2021)) {
+    // Conectar al servidor Java
+    if (!connectToServer("localhost", 2021)) {
         SDL_Log("No se pudo conectar al servidor. Continuando en modo local...");
     }
 

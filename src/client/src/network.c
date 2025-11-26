@@ -66,19 +66,44 @@ bool connectToServer(const char* address, int port) {
     serverAddr.sin_port = htons(port);
     
 #ifdef _WIN32
+    // Intentar convertir directamente primero
     serverAddr.sin_addr.s_addr = inet_addr(address);
+    
+    // Si falla (como con "localhost"), usar getaddrinfo para resolver
     if (serverAddr.sin_addr.s_addr == INADDR_NONE) {
-        SDL_Log("Direccion IP invalida");
-        closesocket(connection.sockfd);
-        connection.sockfd = INVALID_SOCKET;
-        return false;
+        struct addrinfo hints, *result = NULL;
+        memset(&hints, 0, sizeof(hints));
+        hints.ai_family = AF_INET;
+        hints.ai_socktype = SOCK_STREAM;
+        hints.ai_protocol = IPPROTO_TCP;
+        
+        if (getaddrinfo(address, NULL, &hints, &result) != 0) {
+            SDL_Log("No se pudo resolver el hostname: %s", address);
+            closesocket(connection.sockfd);
+            connection.sockfd = INVALID_SOCKET;
+            return false;
+        }
+        
+        serverAddr.sin_addr = ((struct sockaddr_in*)result->ai_addr)->sin_addr;
+        freeaddrinfo(result);
     }
 #else
     if (inet_pton(AF_INET, address, &serverAddr.sin_addr) <= 0) {
-        SDL_Log("Direccion IP invalida");
-        closesocket(connection.sockfd);
-        connection.sockfd = INVALID_SOCKET;
-        return false;
+        // Intentar resolver hostname
+        struct addrinfo hints, *result = NULL;
+        memset(&hints, 0, sizeof(hints));
+        hints.ai_family = AF_INET;
+        hints.ai_socktype = SOCK_STREAM;
+        
+        if (getaddrinfo(address, NULL, &hints, &result) != 0) {
+            SDL_Log("No se pudo resolver el hostname: %s", address);
+            closesocket(connection.sockfd);
+            connection.sockfd = INVALID_SOCKET;
+            return false;
+        }
+        
+        serverAddr.sin_addr = ((struct sockaddr_in*)result->ai_addr)->sin_addr;
+        freeaddrinfo(result);
     }
 #endif
 
