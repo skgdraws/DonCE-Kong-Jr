@@ -75,20 +75,68 @@ public class GameClientHandler implements Runnable {
         
         // Send player information
         gameState.append("PLAYER").append(GAME_STATE_SEPARATOR);
-        gameState.append(game.getPlayer().x).append(",");
-        gameState.append(game.getPlayer().y).append(",");
-        gameState.append(game.getPlayer().lives).append(",");
-        gameState.append(game.getPlayer().score).append(GAME_STATE_SEPARATOR);
+        gameState.append(game.getPlayer().getX()).append(",");
+        gameState.append(game.getPlayer().getY()).append(",");
+        gameState.append(game.getPlayer().getLives()).append(",");
+        gameState.append(game.getPlayer().getScore()).append(GAME_STATE_SEPARATOR);
         
-        // Send enemies information
+        // Send enemies information with type and position
         gameState.append("ENEMIES").append(GAME_STATE_SEPARATOR);
-        gameState.append(game.getEnemies().size()).append(GAME_STATE_SEPARATOR);
+        gameState.append(buildEnemiesList()).append(GAME_STATE_SEPARATOR);
         
-        // Send collectibles information
-        gameState.append("COLLECTIBLES").append(GAME_STATE_SEPARATOR);
-        gameState.append(game.getCollectibles().size());
+        // Send collectibles information with type and position
+        gameState.append("FRUITS").append(GAME_STATE_SEPARATOR);
+        gameState.append(buildFruitsList());
         
         this.output.writeUTF(gameState.toString());
+    }
+
+    /**
+     * Construye una lista de enemigos con su tipo y posición.
+     * Formato: enemy_type(x,y);enemy_type(x,y);...
+     * @return string con la información de enemigos
+     */
+    private String buildEnemiesList() {
+        StringBuilder enemies = new StringBuilder();
+        java.util.ArrayList<Enemy> enemyList = game.getEnemies();
+        
+        for (int i = 0; i < enemyList.size(); i++) {
+            Enemy enemy = enemyList.get(i);
+            String type = enemy.getClass().getSimpleName().toLowerCase();
+            enemies.append(type).append("(");
+            enemies.append((int)enemy.getX()).append(",");
+            enemies.append((int)enemy.getY()).append(")");
+            
+            if (i < enemyList.size() - 1) {
+                enemies.append(";");
+            }
+        }
+        
+        return enemies.toString();
+    }
+
+    /**
+     * Construye una lista de frutas con su tipo y posición.
+     * Formato: fruit_type(x,y);fruit_type(x,y);...
+     * @return string con la información de frutas
+     */
+    private String buildFruitsList() {
+        StringBuilder fruits = new StringBuilder();
+        java.util.ArrayList<Collectible> collectibleList = game.getCollectibles();
+        
+        for (int i = 0; i < collectibleList.size(); i++) {
+            Collectible collectible = collectibleList.get(i);
+            String type = collectible.getClass().getSimpleName().toLowerCase();
+            fruits.append(type).append("(");
+            fruits.append((int)collectible.getX()).append(",");
+            fruits.append((int)collectible.getY()).append(")");
+            
+            if (i < collectibleList.size() - 1) {
+                fruits.append(";");
+            }
+        }
+        
+        return fruits.toString();
     }
 
     /**

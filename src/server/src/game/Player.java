@@ -19,6 +19,22 @@ public class Player extends Entity {
         this.vy = 0.0;
     }
 
+    public double getX() {
+        return this.x;
+    }
+
+    public double getY() {
+        return this.y;
+    }
+
+    public int getLives() {
+        return this.lives;
+    }
+
+    public int getScore() {
+        return this.score;
+    }
+
     public void applyGravity() {
         if (!this.onGround && !this.climbing) {
             double gravity = 0.5;
