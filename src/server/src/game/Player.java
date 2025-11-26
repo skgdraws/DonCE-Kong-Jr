@@ -8,6 +8,17 @@ public class Player extends Entity {
     protected boolean onGround;
     protected boolean climbing;
 
+    public Player() {
+        this.lives = 3;
+        this.score = 0;
+        this.onGround = false;
+        this.climbing = false;
+        this.width = 32;
+        this.height = 16;
+        this.vx = 0.0;
+        this.vy = 0.0;
+    }
+
     public void applyGravity() {
         if (!this.onGround && !this.climbing) {
             double gravity = 0.5;
