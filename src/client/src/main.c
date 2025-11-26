@@ -11,6 +11,7 @@
 #include "renderer.h"
 #include "input.h"
 #include "game_logic.h"
+#include "network.h"
 
 /*
 ╔═══════════════════════════════════════════════════════════════════════════╗
@@ -30,6 +31,12 @@ int main(int argc, char *argv[]) {
     // Inicializar generador de numeros aleatorios
     srand((unsigned int)time(NULL));
 
+    // Inicializar sistema de red
+    if (!initNetwork()) {
+        SDL_Log("Error al inicializar el sistema de red");
+        return 1;
+    }
+
     // Metadata de la aplicacion
     SDL_SetAppMetadata("DonCE Kong Jr", "1.0", "com.tec.donce-kong-jr");
 
@@ -44,9 +51,15 @@ int main(int argc, char *argv[]) {
     SDL_Renderer* renderer = NULL;
     if (!SDL_CreateWindowAndRenderer("DonCE Kong Jr", 512, 448, SDL_WINDOW_RESIZABLE, &window, &renderer)) {
         SDL_Log("No se pudo crear la ventana/renderer: %s", SDL_GetError());
-        SDL_Quit();
-        return 1;
+    loadAssets(renderer);
+
+    // TODO: Conectar al servidor Java
+    // Descomentar cuando el servidor este listo:
+    if (!connectToServer("127.0.0.1", 2021)) {
+        SDL_Log("No se pudo conectar al servidor. Continuando en modo local...");
     }
+
+    // Loop principal del juego
 
     SDL_SetRenderLogicalPresentation(renderer, 512, 448, SDL_LOGICAL_PRESENTATION_LETTERBOX);
 
@@ -61,14 +74,15 @@ int main(int argc, char *argv[]) {
         update();
 
         // Renderizar
-        render(renderer);
-
-        // Limitar a ~60 FPS
-        SDL_Delay(16);
-    }
-
     // Limpieza
     cleanupAssets();
+    cleanupNetwork();
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+
+    return 0;
+}   cleanupAssets();
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();

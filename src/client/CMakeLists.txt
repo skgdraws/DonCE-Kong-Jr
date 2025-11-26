@@ -19,6 +19,7 @@ add_executable(main
     src/renderer.c
     src/input.c
     src/game_logic.c
+    src/network.c
 )
 
 # Include SDL3 headers
@@ -26,6 +27,11 @@ target_include_directories(main PRIVATE ${SDL3_INCLUDE_DIR})
 
 # Link SDL3 library
 target_link_libraries(main ${SDL3_LIBRARY})
+
+# Link Winsock2 for Windows networking
+if(WIN32)
+    target_link_libraries(main ws2_32)
+endif()
 
 # Copy SDL3.dll to project root directory
 add_custom_command(TARGET main POST_BUILD
