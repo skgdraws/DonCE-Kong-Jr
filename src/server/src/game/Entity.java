@@ -18,4 +18,20 @@ public abstract class Entity {
     Rectangle getBounds() {
         return new Rectangle((int)x, (int)y, width, height);
     }
+
+    public double getX() {
+        return this.x;
+    }
+
+    public double getY() {
+        return this.y;
+    }
+
+    public int getWidth() {
+        return this.width;
+    }
+
+    public int getHeight() {
+        return this.height;
+    }
 }
