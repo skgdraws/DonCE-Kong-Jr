@@ -21,16 +21,18 @@
 
 ## 📖 Descripción
 
-DonCE-Kong-Jr es un juego estilo Donkey Kong Jr. con arquitectura cliente-servidor híbrida. El servidor está implementado en **Java** para aprovechar su robustez en aplicaciones de red, mientras que el cliente y el manager están desarrollados en **C** para un control más directo del hardware y rendimiento gráfico. El proyecto demuestra comunicación entre procesos, manejo de sockets, y arquitectura de sistemas distribuidos multi-lenguaje.
+DonCE-Kong-Jr es un juego multijugador inspirado en el clásico Donkey Kong Jr. con arquitectura cliente-servidor híbrida. El servidor está implementado en **Java** para aprovechar su robustez en aplicaciones de red y manejo de múltiples clientes, mientras que el cliente está desarrollado en **C con SDL3** para un renderizado gráfico eficiente y control directo del hardware. El proyecto demuestra comunicación mediante sockets TCP/IP, arquitectura modular, y sistemas distribuidos multi-lenguaje.
 
 ## ✨ Características
 
-- 🎯 **Arquitectura Cliente-Servidor**: Comunicación eficiente mediante sockets
+- 🎯 **Arquitectura Cliente-Servidor**: Comunicación mediante sockets TCP/IP (puerto 2121)
 - 👥 **Multijugador**: Soporte para múltiples clientes simultáneos
-- 🎨 **Interfaz Gráfica**: Renderizado de gráficos utilizando assets personalizados
-- 🔊 **Sistema de Sonido**: Efectos de sonido y música de fondo
-- 📊 **Sistema de Gestión**: Manager para controlar el flujo del juego
-- 🏆 **Sistema de Puntuación**: Seguimiento de puntajes y rankings
+- 🎨 **Renderizado con SDL3**: Ventana 512x448 con presentación lógica y letterboxing
+- 🎮 **Sistema de Animación**: Frames animados para personajes (idle, corriendo, saltando, escalando)
+- 🏗️ **Arquitectura Modular**: Cliente dividido en 10 módulos independientes
+- 🌐 **Networking Asíncrono**: Sockets no bloqueantes con Winsock2
+- 📊 **Menú Principal**: Sistema de navegación por teclado
+- 🎨 **Assets Completos**: 11 sprites BMP + fuente personalizada Kong Text
 
 ## 🏗️ Arquitectura
 
@@ -40,87 +42,100 @@ El proyecto está dividido en tres componentes principales:
 DonCE-Kong-Jr/
 │
 ├── src/
-│   ├── client/          # Cliente del juego (C)
-│   │   └── main.c       # Interfaz gráfica y controles
+│   ├── client/          # Cliente del juego (C + SDL3)
+│   │   ├── src/         # Código fuente modular
+│   │   │   ├── main.c           # Punto de entrada y game loop
+│   │   │   ├── assets.c/h       # Gestión de recursos
+│   │   │   ├── player.c/h       # Lógica del jugador
+│   │   │   ├── enemy.c/h        # Sistema de enemigos
+│   │   │   ├── game_state.c/h   # Estado del juego
+│   │   │   ├── game_logic.c/h   # Lógica principal
+│   │   │   ├── input.c/h        # Manejo de entrada
+│   │   │   ├── renderer.c/h     # Sistema de renderizado
+│   │   │   └── network.c/h      # Comunicación con servidor
+│   │   ├── assets/
+│   │   │   ├── img/             # Sprites (11 archivos BMP)
+│   │   │   └── font/            # Fuente Kong Text TTF
+│   │   ├── build/               # Archivos generados por CMake
+│   │   └── CMakeLists.txt       # Configuración de build
 │   │
-│   ├── server/          # Servidor del juego (Java)
-│   │   └── main.java    # Lógica del servidor
-│   │
-│   └── manager/         # Gestor del sistema (C)
-│       └── main.c       # Coordinador de sesiones
-│
-├── assets/
-│   ├── img/            # Sprites y recursos gráficos
-│   ├── sound/          # Efectos de sonido y música
-│   └── font/           # Fuentes tipográficas
+│   └── server/          # Servidor del juego (Java)
+│       └── src/
+│           ├── App.java              # Aplicación principal
+│           ├── game/                 # Lógica del juego
+│           │   ├── Logic.java        # Lógica principal
+│           │   ├── Player.java       # Entidad jugador
+│           │   ├── Enemy.java        # Sistema de enemigos
+│           │   ├── Entity.java       # Clase base
+│           │   ├── Platform.java     # Plataformas
+│           │   ├── Vine.java         # Enredaderas
+│           │   └── Collectible.java  # Items coleccionables
+│           └── sockets/              # Sistema de red
+│               ├── Server.java       # Servidor TCP
+│               ├── GameClientHandler.java
+│               └── Client.java
 │
 └── docs/               # Documentación del proyecto
-    └── especificaciones.pdf
-```
-
-### Componentes
-
-1. **Cliente (C)**: 
-   - Maneja la interfaz de usuario y la interacción del jugador
-   - Renderizado gráfico optimizado
-   - Control directo de entrada/salida
-
-2. **Servidor (Java)**: 
-   - Gestiona la lógica del juego y estado global
-   - Manejo robusto de conexiones concurrentes
-   - Comunicación entre múltiples clientes
-   - Sistema de sincronización de juego
-
-3. **Manager (C)**: 
-   - Coordina el servidor y gestiona las sesiones de juego
-   - Monitoreo de recursos del sistema
-   - Administración de partidas activas
-
+    ├── Bitácora Franco.md
+    ├── Bitácora Kevin.md
 ## 🚀 Instalación
 
 ### Prerrequisitos
 
-**Para los componentes en C (Cliente y Manager):**
-- Compilador GCC
-- Make
-- Bibliotecas de desarrollo (SDL2, pthread, etc.)
+**Para el Cliente (C):**
+- **CMake** 3.20 o superior
+- **MinGW-x64** (GCC para Windows) o GCC en Linux
+- **SDL3** (Simple DirectMedia Layer 3)
+- **Winsock2** (Windows) o sockets POSIX (Linux)
 
-**Para el componente en Java (Servidor):**
-- JDK 11 o superior
-- Maven o Gradle (opcional, para gestión de dependencias)
-
-### Linux
-
-```bash
-# Clonar el repositorio
-git clone https://github.com/skgdraws/DonCE-Kong-Jr.git
-cd DonCE-Kong-Jr
-
-# Compilar componentes en C
-make client
-make manager
-
-# Compilar servidor Java
-cd src/server
-javac main.java
-# O con Maven/Gradle si está configurado
-# mvn clean package
-```
+**Para el Servidor (Java):**
+- **JDK 11** o superior
+- IntelliJ IDEA (recomendado) o cualquier IDE Java
 
 ### Windows
+
+#### Cliente
 
 ```powershell
 # Clonar el repositorio
 git clone https://github.com/skgdraws/DonCE-Kong-Jr.git
-cd DonCE-Kong-Jr
+cd DonCE-Kong-Jr/src/client
 
-# Compilar componentes en C usando MinGW
-gcc -o client.exe src/client/main.c
-gcc -o manager.exe src/manager/main.c
+# Configurar y compilar con CMake
+mkdir build
+cd build
+cmake -G "MinGW Makefiles" ..
+mingw32-make
 
-# Compilar servidor Java
-cd src/server
-javac main.java
+# El ejecutable estará en: src/client/main.exe
+```
+
+#### Servidor
+
+```powershell
+# Desde IntelliJ IDEA
+# 1. Abrir el proyecto: src/server
+# 2. Ejecutar App.java
+
+# O desde terminal
+cd src/server/src
+javac App.java game/*.java sockets/*.java
+java App
+```
+
+### Linux
+
+```bash
+# Cliente
+cd src/client
+mkdir build && cd build
+cmake ..
+make
+
+# Servidor
+cd src/server/src
+javac App.java game/*.java sockets/*.java
+java App
 ```
 
 ## 🎮 Uso
@@ -128,83 +143,148 @@ javac main.java
 ### Iniciar el Servidor (Java)
 
 ```bash
-cd src/server
-java main [puerto]
+# Desde src/server/src
+java App
+
+# El servidor iniciará en el puerto 2121
+# Salida esperada:
+# === Donkey Kong Jr - Multi-Game Server ===
+# Starting server on port 2121...
 ```
 
-### Iniciar el Manager
+### Iniciar el Cliente (C)
 
 ```bash
-./manager [opciones]
-```
+# Windows
+cd src/client
+.\main.exe
 
-### Iniciar el Cliente
+# Linux
+cd src/client/build
+./main
 
-```bash
-./client [servidor] [puerto]
+# El cliente intentará conectarse automáticamente a localhost:2121
 ```
 
 ### Ejemplo de Sesión Completa
 
 ```bash
 # Terminal 1 - Iniciar servidor (Java)
-cd src/server
-java main 8080
+cd src/server/src
+java App
 
-# Terminal 2 - Iniciar manager (C)
-./manager
+# Terminal 2 - Iniciar cliente 1 (C)
+cd src/client
+.\main.exe
 
-# Terminal 3 - Iniciar cliente 1 (C)
-./client localhost 8080
-
-# Terminal 4 - Iniciar cliente 2 (C)
-./client localhost 8080
+# Terminal 3 - Iniciar cliente 2 (C)
+cd src/client
+.\main.exe
 ```
 
 ## 🎯 Controles del Juego
 
-- **←/→**: Mover izquierda/derecha
-- **↑**: Subir
-- **↓**: Bajar
+### Menú Principal
+- **↑/↓**: Navegar opciones
+- **Enter**: Seleccionar opción
+
+### En Juego
+- **W/↑**: Subir
+- **A/←**: Mover izquierda
+- **S/↓**: Bajar
+- **D/→**: Mover derecha
 - **Espacio**: Saltar
-- **ESC**: Pausar/Menú
+- **ESC**: Volver al menú
 
 ## 📚 Documentación
 
-Para más detalles sobre el diseño y especificaciones del proyecto, consulta:
+Para más detalles sobre el desarrollo del proyecto, consulta las bitácoras:
 
-- [Especificaciones del Proyecto](docs/especificaciones.pdf)
+- [Bitácora Franco Sagot](docs/Bitácora%20Franco.md)
+- [Bitácora Kevin Ruiz](docs/Bitácora%20Kevin.md)
+- [Bitácora Pamela Chacón](docs/Bitácora%20Pamela.md)
+
+### Tecnologías Utilizadas
+
+**Cliente:**
+- SDL3 (Simple DirectMedia Layer 3)
+- Winsock2 / POSIX Sockets
+- CMake + MinGW-x64
+- C17
+
+**Servidor:**
+- Java 11+
+- ServerSocket (java.net)
+- Multithreading
+- Factory Pattern para entidades
 
 ## 🛠️ Desarrollo
 
+### Arquitectura del Cliente
+
+El cliente está modularizado en componentes independientes:
+
+- **main.c**: Game loop principal (~60 FPS)
+- **network.c/h**: Comunicación TCP/IP asíncrona
+- **renderer.c/h**: Renderizado con SDL3
+- **player.c/h**: Lógica y animación del jugador
+- **enemy.c/h**: Sistema de enemigos
+- **game_state.c/h**: Estado global del juego
+- **game_logic.c/h**: Lógica principal
+- **input.c/h**: Procesamiento de entrada
+- **assets.c/h**: Gestión de recursos
+
 ### Estructura de Comunicación
 
-El proyecto utiliza una arquitectura híbrida:
-- **Sockets TCP/IP** para comunicación cliente-servidor
-- **Protocolo personalizado** para mensajes del juego
-- **Java NIO** en el servidor para manejo eficiente de conexiones
-- **Multithreading** para manejar múltiples conexiones concurrentes
-- **IPC (Inter-Process Communication)** entre manager y servidor
+- **Protocolo**: TCP/IP
+- **Puerto**: 2121
+- **Formato**: Mensajes de texto
+- **Cliente**: Sockets no bloqueantes (FIONBIO)
+- **Servidor**: Multithreading con GameClientHandler por cliente
 
 ### Compilación en Modo Debug
 
 ```bash
-# Componentes C
-make debug
+# Cliente (CMake)
+cd src/client/build
+cmake -DCMAKE_BUILD_TYPE=Debug ..
+mingw32-make
 
 # Servidor Java
-javac -g main.java
+javac -g App.java game/*.java sockets/*.java
 ```
 
 ### Limpieza
 
 ```bash
-# Limpiar componentes C
-make clean
+# Cliente
+cd src/client/build
+mingw32-make clean
 
-# Limpiar archivos Java
-cd src/server
-rm *.class
+# Servidor
+cd src/server/src
+del /Q *.class game\*.class sockets\*.class  # Windows
+rm *.class game/*.class sockets/*.class      # Linux
+```
+
+### Estructura de Assets
+
+```
+src/client/assets/
+├── img/
+│   ├── bg.bmp              # Fondo (58 KB)
+│   ├── dk-jr.bmp           # Donkey Kong Jr (28 KB)
+│   ├── dk.bmp              # Donkey Kong (24 KB)
+│   ├── mario.bmp           # Mario (5 KB)
+│   ├── gator-blue.bmp      # Cocodrilo azul (2 KB)
+│   ├── gator-red.bmp       # Cocodrilo rojo (2 KB)
+│   ├── cage.bmp            # Jaula (6 KB)
+│   ├── fruit.bmp           # Frutas (3 KB)
+│   ├── life-icon.bmp       # Icono de vida (1 KB)
+│   ├── point-tally.bmp     # Contador (7 KB)
+│   └── points.bmp          # Puntos (2 KB)
+└── font/
+    └── kongtext.ttf        # Fuente Kong Text (10 KB)
 ```
 
 ## 🤝 Contribuciones
@@ -223,15 +303,43 @@ Este proyecto fue desarrollado con fines educativos.
 
 ## 👥 Autores
 
-- **Pamela Chacón** - [@PamelaChB](https://github.com/pamelachb)
-- **Franco Sagot** [@SKGDraws](https://github.com/skgdraws)
-- **Kevin Ruiz** - [@Kevrr](https://github.com/kevrr)
-
+- **Pamela Chacón** - Cliente C - [@PamelaChB](https://github.com/pamelachb)
+- **Franco Sagot** - Cliente C + SDL3 - [@SKGDraws](https://github.com/skgdraws)
+- **Kevin Ruiz** - Servidor Java - [@Kevrr](https://github.com/kevrr)
 
 ## 🙏 Agradecimientos
 
-- Inspirado en el clásico Donkey Kong Jr. de Nintendo
-- Desarrollado como proyecto académico
+- Inspirado en el clásico Donkey Kong Jr. de Nintendo (1982)
+- SDL3 Team por la excelente biblioteca de renderizado
+- Desarrollado como proyecto académico del curso de Paradigmas de Programación
+- Instituto Tecnológico de Costa Rica (TEC)
+
+## 📊 Estado del Proyecto
+
+**Versión Actual**: 1.0.0 (En desarrollo)
+
+**Completado:**
+- ✅ Configuración del entorno de desarrollo
+- ✅ Sistema de renderizado con SDL3
+- ✅ Arquitectura modular del cliente
+- ✅ Sistema de animación por frames
+- ✅ Menú principal funcional
+- ✅ Módulo de networking básico
+- ✅ Servidor Java con manejo de múltiples clientes
+
+**En Desarrollo:**
+- 🔄 Protocolo de comunicación cliente-servidor
+- 🔄 Sincronización de estado del juego
+- 🔄 Lógica completa de enemigos
+- 🔄 Sistema de colisiones
+- 🔄 Sistema de puntuación
+
+**Pendiente:**
+- ⏳ Niveles adicionales
+- ⏳ Sistema de sonido
+- ⏳ Efectos visuales
+- ⏳ Pantalla de game over
+- ⏳ Ranking de jugadores
 
 ---
 
