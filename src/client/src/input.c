@@ -1,6 +1,7 @@
 #include "input.h"
 #include "game_state.h"
 #include "enemy.h"
+#include "network.h"
 #include <SDL3/SDL.h>
 #include <stdlib.h>
 
@@ -34,7 +35,12 @@ void handleMenuInput(SDL_Event* event) {
                 }
                 break;
             case SDLK_ESCAPE:
-                gameState = GAME_STATE_QUIT;
+                // Disconnect from server when returning to menu
+                if (isConnected()) {
+                    SDL_Log("Desconectando del servidor...");
+                    disconnectFromServer();
+                }
+                gameState = GAME_STATE_MENU;
                 break;
         }
     }
@@ -44,6 +50,11 @@ void handleGameInput(SDL_Event* event) {
     if (event->type == SDL_EVENT_KEY_DOWN) {
         switch (event->key.key) {
             case SDLK_ESCAPE:
+                // Disconnect from server when returning to menu
+                if (isConnected()) {
+                    SDL_Log("Desconectando del servidor...");
+                    disconnectFromServer();
+                }
                 gameState = GAME_STATE_MENU;
                 break;
             case SDLK_W:
@@ -123,6 +134,11 @@ void handleConnectingInput(SDL_Event* event) {
 void handleSpectatingInput(SDL_Event* event) {
     if (event->type == SDL_EVENT_KEY_DOWN) {
         if (event->key.key == SDLK_ESCAPE) {
+            // Disconnect from server when returning to menu
+            if (isConnected()) {
+                SDL_Log("Desconectando del servidor...");
+                disconnectFromServer();
+            }
             gameState = GAME_STATE_MENU;
         }
     }
@@ -133,6 +149,11 @@ void handleEvents(bool* running) {
     
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_EVENT_QUIT) {
+            // Disconnect from server when quitting
+            if (isConnected()) {
+                SDL_Log("Desconectando del servidor antes de cerrar...");
+                disconnectFromServer();
+            }
             *running = false;
             return;
         }

@@ -15,11 +15,12 @@ void renderMenu(SDL_Renderer* renderer) {
 
     // Dibujar logo
     if (logoTexture) {
-        SDL_FRect logoRect = {106, 40, 300, 120};
+        // Logo: 183x56, centered horizontally at top
+        SDL_FRect logoRect = {(224 - 183) / 2.0f, 10, 183, 56};
         SDL_RenderTexture(renderer, logoTexture, NULL, &logoRect);
     } else {
         // Fallback: rectangulo de titulo
-        SDL_FRect titleRect = {156, 80, 200, 40};
+        SDL_FRect titleRect = {62, 20, 100, 20};
         SDL_SetRenderDrawColor(renderer, 255, 200, 0, 255);
         SDL_RenderFillRect(renderer, &titleRect);
     }
@@ -35,7 +36,7 @@ void renderMenu(SDL_Renderer* renderer) {
     
     // Dibujar opciones del menu
     for (int i = 0; i < MENU_COUNT; i++) {
-        float yPos = 275 + i * 35;
+        float yPos = 125 + i * 15;
         
         if (font) {
             // Renderizar texto con fuente (SDL3_ttf requiere longitud del string)
@@ -45,8 +46,9 @@ void renderMenu(SDL_Renderer* renderer) {
             if (textSurface) {
                 SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
                 if (textTexture) {
-                    // Centrar el texto horizontalmente (ventana de 512px de ancho)
-                    float textX = (512 - textSurface->w) / 2.0f;
+                    SDL_SetTextureScaleMode(textTexture, SDL_SCALEMODE_NEAREST);
+                    // Centrar el texto horizontalmente (ventana de 224px de ancho)
+                    float textX = (224 - textSurface->w) / 2.0f;
                     textPositions[i] = textX;
                     if (textSurface->w > maxTextWidth) {
                         maxTextWidth = textSurface->w;
@@ -64,8 +66,8 @@ void renderMenu(SDL_Renderer* renderer) {
             }
         } else {
             // Fallback: rectangulos de colores centrados
-            SDL_FRect optionRect = {181, yPos, 150, 35};
-            textPositions[i] = 181;
+            SDL_FRect optionRect = {75, yPos, 75, 15};
+            textPositions[i] = 75;
             
             if (i == selectedOption) {
                 SDL_SetRenderDrawColor(renderer, 255, 255, 100, 255);
@@ -79,14 +81,14 @@ void renderMenu(SDL_Renderer* renderer) {
     // Dibujar indicador de seleccion (icono de vida)
     SDL_Texture* lifeIcon = getLifeIconTexture();
     if (lifeIcon) {
-        // Posicionar el icono a la izquierda del texto, con margen de 10px
-        float iconX = (maxTextWidth > 0) ? ((512 - maxTextWidth) / 2.0f - 30) : 150;
-        SDL_FRect selectorRect = {iconX, 270 + selectedOption * 35, 20, 20};
+        // Posicionar el icono a la izquierda del texto, con margen de 5px
+        float iconX = (maxTextWidth > 0) ? ((224 - maxTextWidth) / 2.0f - 15) : 75;
+        SDL_FRect selectorRect = {iconX, 125 + selectedOption * 15, 8, 8};
         SDL_RenderTexture(renderer, lifeIcon, NULL, &selectorRect);
     } else {
         // Fallback: rectangulo rojo
-        float iconX = (maxTextWidth > 0) ? ((512 - maxTextWidth) / 2.0f - 30) : 150;
-        SDL_FRect selectorRect = {iconX, 270 + selectedOption * 35, 20, 25};
+        float iconX = (maxTextWidth > 0) ? ((224 - maxTextWidth) / 2.0f - 25) : 75;
+        SDL_FRect selectorRect = {iconX, 125 + selectedOption * 15, 8, 8};
         SDL_SetRenderDrawColor(renderer, 255, 50, 50, 255);
         SDL_RenderFillRect(renderer, &selectorRect);
     }
@@ -99,22 +101,74 @@ void renderGame(SDL_Renderer* renderer) {
 
     SDL_Texture* backgroundTexture = getBackgroundTexture();
     SDL_Texture* playerSpritesheet = getPlayerSpritesheet();
+    SDL_Texture* dkTexture = getDKTexture();
+    SDL_Texture* cageTexture = getCageTexture();
+    SDL_Texture* marioTexture = getMarioTexture();
     Player* player = getPlayer();
     Enemy* enemies = getEnemies();
+
+    // Contador de animacion estatico para DK (3 frames a 48x32 cada uno)
+    static int dkAnimCounter = 0;
+    static const int DK_FRAME_WIDTH = 48;
+    static const int DK_FRAME_HEIGHT = 32;
+    static const int DK_FRAME_COUNT = 3;
+    static const int DK_ANIM_SPEED = 8; // Cambiar frame cada 8 frames de juego
+
+    // Contador de animacion estatico para Mario (5 frames a 16x16 cada uno)
+    static int marioAnimCounter = 0;
+    static const int MARIO_FRAME_WIDTH = 16;
+    static const int MARIO_FRAME_HEIGHT = 16;
+    static const int MARIO_FRAME_COUNT = 2;
+    static const int MARIO_ANIM_SPEED = 8; // Cambiar frame cada 8 frames de juego
 
     // Dibujar el fondo si existe
     if (backgroundTexture) {
         SDL_RenderTexture(renderer, backgroundTexture, NULL, NULL);
     } else {
         // Fondo de respaldo si no se carga la imagen
-        SDL_SetRenderDrawColor(renderer, 0, 100, 0, 255);
-        SDL_FRect gameRect = {50, 50, 412, 348};
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_FRect gameRect = {0, 0, 224, 256};
         SDL_RenderFillRect(renderer, &gameRect);
+    }
+
+    // Dibujar Donkey Kong (detras de la jaula)
+    if (dkTexture) {
+        int currentFrame = (dkAnimCounter / DK_ANIM_SPEED) % DK_FRAME_COUNT;
+        SDL_FRect srcRect = {
+            currentFrame * DK_FRAME_WIDTH,
+            0,
+            DK_FRAME_WIDTH,
+            DK_FRAME_HEIGHT
+        };
+        SDL_FRect dstRect = {4, 40, 48, 32};
+        SDL_RenderTexture(renderer, dkTexture, &srcRect, &dstRect);
+        dkAnimCounter++;
+    }
+
+    // Dibujar la jaula (encima de DK)
+    if (cageTexture) {
+        SDL_FRect cageRect = {4, 40, 48, 32};
+        SDL_RenderTexture(renderer, cageTexture, NULL, &cageRect);
+    }
+
+    // Dibujar Mario (animado, horizontally flipped)
+    if (marioTexture) {
+        int currentFrame = (marioAnimCounter / MARIO_ANIM_SPEED) % MARIO_FRAME_COUNT;
+        SDL_FRect srcRect = {
+            currentFrame * MARIO_FRAME_WIDTH,
+            0,
+            MARIO_FRAME_WIDTH,
+            MARIO_FRAME_HEIGHT
+        };
+        SDL_FRect dstRect = {56, 56, 16, 16};
+        SDL_RenderTextureRotated(renderer, marioTexture, &srcRect, &dstRect, 0, NULL, SDL_FLIP_HORIZONTAL);
+        marioAnimCounter++;
     }
 
     // Dibujar el bloque del jugador
     if (playerSpritesheet) {
         // Usar el indice de sprite directamente
+        // Spritesheet: 448x16 (14 frames de 32x16 cada uno)
         SDL_FRect srcRect = {
             player->spriteIndex * PLAYER_SPRITE_WIDTH,
             0,
@@ -124,13 +178,13 @@ void renderGame(SDL_Renderer* renderer) {
         SDL_FRect dstRect = {
             player->x,
             player->y,
-            PLAYER_SPRITE_WIDTH * 2,  // Escalar 2x
-            PLAYER_SPRITE_HEIGHT * 2
+            32,  // 32x16 at native resolution
+            16
         };
         SDL_RenderTexture(renderer, playerSpritesheet, &srcRect, &dstRect);
     } else {
         // Fallback: dibujar rectangulo si no hay sprite
-        SDL_FRect playerRect = {player->x, player->y, player->size, player->size};
+        SDL_FRect playerRect = {player->x, player->y, 32, 16};
         SDL_SetRenderDrawColor(renderer, 255, 100, 100, 255);
         SDL_RenderFillRect(renderer, &playerRect);
     }
@@ -161,7 +215,8 @@ void renderSpectateMenu(SDL_Renderer* renderer) {
         if (titleSurface) {
             SDL_Texture* titleTexture = SDL_CreateTextureFromSurface(renderer, titleSurface);
             if (titleTexture) {
-                SDL_FRect titleRect = {(512 - titleSurface->w) / 2.0f, 150, (float)titleSurface->w, (float)titleSurface->h};
+                SDL_SetTextureScaleMode(titleTexture, SDL_SCALEMODE_NEAREST);
+                SDL_FRect titleRect = {(224 - titleSurface->w) / 2.0f, 80, (float)titleSurface->w, (float)titleSurface->h};
                 SDL_RenderTexture(renderer, titleTexture, NULL, &titleRect);
                 SDL_DestroyTexture(titleTexture);
             }
@@ -175,7 +230,8 @@ void renderSpectateMenu(SDL_Renderer* renderer) {
         if (msgSurface) {
             SDL_Texture* msgTexture = SDL_CreateTextureFromSurface(renderer, msgSurface);
             if (msgTexture) {
-                SDL_FRect msgRect = {(512 - msgSurface->w) / 2.0f, 250, (float)msgSurface->w, (float)msgSurface->h};
+                SDL_SetTextureScaleMode(msgTexture, SDL_SCALEMODE_NEAREST);
+                SDL_FRect msgRect = {(224 - msgSurface->w) / 2.0f, 120, (float)msgSurface->w, (float)msgSurface->h};
                 SDL_RenderTexture(renderer, msgTexture, NULL, &msgRect);
                 SDL_DestroyTexture(msgTexture);
             }
@@ -213,7 +269,8 @@ void renderCredits(SDL_Renderer* renderer) {
                 if (textSurface) {
                     SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
                     if (textTexture) {
-                        SDL_FRect textRect = {(512 - textSurface->w) / 2.0f, 50 + i * 40, (float)textSurface->w, (float)textSurface->h};
+                        SDL_SetTextureScaleMode(textTexture, SDL_SCALEMODE_NEAREST);
+                        SDL_FRect textRect = {(224 - textSurface->w) / 2.0f, 20 + i * 20, (float)textSurface->w, (float)textSurface->h};
                         SDL_RenderTexture(renderer, textTexture, NULL, &textRect);
                         SDL_DestroyTexture(textTexture);
                     }
@@ -239,7 +296,8 @@ void renderConnecting(SDL_Renderer* renderer) {
         if (msgSurface) {
             SDL_Texture* msgTexture = SDL_CreateTextureFromSurface(renderer, msgSurface);
             if (msgTexture) {
-                SDL_FRect msgRect = {(512 - msgSurface->w) / 2.0f, 220, (float)msgSurface->w, (float)msgSurface->h};
+                SDL_SetTextureScaleMode(msgTexture, SDL_SCALEMODE_NEAREST);
+                SDL_FRect msgRect = {(224 - msgSurface->w) / 2.0f, 120, (float)msgSurface->w, (float)msgSurface->h};
                 SDL_RenderTexture(renderer, msgTexture, NULL, &msgRect);
                 SDL_DestroyTexture(msgTexture);
             }
@@ -262,6 +320,7 @@ void renderSpectating(SDL_Renderer* renderer) {
         if (msgSurface) {
             SDL_Texture* msgTexture = SDL_CreateTextureFromSurface(renderer, msgSurface);
             if (msgTexture) {
+                SDL_SetTextureScaleMode(msgTexture, SDL_SCALEMODE_NEAREST);
                 SDL_FRect msgRect = {10, 10, (float)msgSurface->w, (float)msgSurface->h};
                 SDL_RenderTexture(renderer, msgTexture, NULL, &msgRect);
                 SDL_DestroyTexture(msgTexture);

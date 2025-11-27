@@ -3,7 +3,7 @@
 
 // Instancia del jugador
 static Player player = {
-    .x = 230.0f,
+    .x = 100.0f,
     .y = 200.0f,
     .size = PLAYER_SIZE,
     .spriteIndex = SPRITE_IDLE_1,

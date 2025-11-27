@@ -45,4 +45,52 @@ SDL_Texture* getLifeIconTexture(void);
  */
 TTF_Font* getGameFont(void);
 
+/**
+ * @brief Obtiene la textura de puntos
+ * @return Puntero a la textura de puntos, o NULL si no esta cargada
+ */
+SDL_Texture* getPointsTexture(void);
+
+/**
+ * @brief Obtiene la textura del contador de puntos
+ * @return Puntero a la textura del contador de puntos, o NULL si no esta cargada
+ */
+SDL_Texture* getPointTallyTexture(void);
+
+/**
+ * @brief Obtiene la textura de Mario
+ * @return Puntero a la textura de Mario, o NULL si no esta cargada
+ */
+SDL_Texture* getMarioTexture(void);
+
+/**
+ * @brief Obtiene la textura del cocodrilo rojo
+ * @return Puntero a la textura del cocodrilo rojo, o NULL si no esta cargada
+ */
+SDL_Texture* getGatorRedTexture(void);
+
+/**
+ * @brief Obtiene la textura del cocodrilo azul
+ * @return Puntero a la textura del cocodrilo azul, o NULL si no esta cargada
+ */
+SDL_Texture* getGatorBlueTexture(void);
+
+/**
+ * @brief Obtiene la textura de fruta
+ * @return Puntero a la textura de fruta, o NULL si no esta cargada
+ */
+SDL_Texture* getFruitTexture(void);
+
+/**
+ * @brief Obtiene la textura de Donkey Kong
+ * @return Puntero a la textura de DK, o NULL si no esta cargada
+ */
+SDL_Texture* getDKTexture(void);
+
+/**
+ * @brief Obtiene la textura de la jaula
+ * @return Puntero a la textura de la jaula, o NULL si no esta cargada
+ */
+SDL_Texture* getCageTexture(void);
+
 #endif // ASSETS_H

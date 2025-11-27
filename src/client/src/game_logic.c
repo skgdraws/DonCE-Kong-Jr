@@ -21,8 +21,8 @@ void update(void) {
                 SDL_Log("Conectado exitosamente!");
                 gameState = GAME_STATE_PLAYING;
             } else {
-                SDL_Log("No se pudo conectar al servidor");
-                gameState = GAME_STATE_MENU;
+                SDL_Log("No se pudo conectar al servidor\nJuego corre en modo debug.");
+                gameState = GAME_STATE_PLAYING;
             }
             connectingFrames = 0;
             connectionAttempted = false;
