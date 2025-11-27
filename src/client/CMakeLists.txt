@@ -5,12 +5,12 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
 # Set SDL3 paths
-set(SDL3_DIR "D:/Libraries/SDL3-3.2.26-mingw")
+set(SDL3_DIR "C:/Libraries/SDL3-3.2.26")
 set(SDL3_INCLUDE_DIR "${SDL3_DIR}/x86_64-w64-mingw32/include")
 set(SDL3_LIBRARY "${SDL3_DIR}/x86_64-w64-mingw32/lib/libSDL3.dll.a")
 
 # Set SDL3_ttf paths
-set(SDL3_TTF_DIR "D:/Libraries/SDL3_ttf-3.2.2")
+set(SDL3_TTF_DIR "C:/Libraries/SDL3_ttf-3.2.2")
 set(SDL3_TTF_INCLUDE_DIR "${SDL3_TTF_DIR}/x86_64-w64-mingw32/include")
 set(SDL3_TTF_LIBRARY "${SDL3_TTF_DIR}/x86_64-w64-mingw32/lib/libSDL3_ttf.dll.a")
 set(SDL3_TTF_DLL "${SDL3_TTF_DIR}/x86_64-w64-mingw32/bin/SDL3_ttf.dll")

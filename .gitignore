@@ -1,3 +1,6 @@
 # Client Cmake stuff
 src/client/build/*
 src/client/Debug/*
+
+# Server Java stuff
+src/server/src/out/*
