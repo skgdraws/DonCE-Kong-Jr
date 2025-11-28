@@ -7,15 +7,16 @@ import java.io.IOException;
 import java.net.Socket;
 
 /**
- * Clase que maneja la comunicación entre un cliente y un juego específico.
+ * Clase que maneja la comunicación entre un cliente jugador y un juego específico.
+ * Los espectadores son manejados por SpectatorHandler usando el patrón Observer.
  */
 public class GameClientHandler implements Runnable {
     private Socket client;
     private DataOutputStream output;
     private DataInputStream input;
     private Logic game;
-    private int gameNumber;
-    private boolean connected = true;
+    private Integer gameNumber;
+    private Boolean connected = true;
     private static final String GAME_STATE_SEPARATOR = "|";
 
     /**
@@ -49,7 +50,7 @@ public class GameClientHandler implements Runnable {
      * Verifica si el cliente está conectado.
      * @return true si está conectado
      */
-    public boolean isConnected() {
+    public Boolean isConnected() {
         return this.connected;
     }
 
@@ -66,9 +67,10 @@ public class GameClientHandler implements Runnable {
     }
 
     /**
-     * Envía el estado actual del juego al cliente.
+     * Construye el estado actual del juego como string.
+     * @return estado del juego serializado
      */
-    private void sendGameState() throws IOException {
+    private String buildGameState() {
         StringBuilder gameState = new StringBuilder();
         gameState.append("STATE").append(GAME_STATE_SEPARATOR);
         gameState.append(gameNumber).append(GAME_STATE_SEPARATOR);
@@ -89,7 +91,7 @@ public class GameClientHandler implements Runnable {
         gameState.append("FRUITS").append(GAME_STATE_SEPARATOR);
         gameState.append(buildFruitsList());
         
-        this.output.writeUTF(gameState.toString());
+        return gameState.toString();
     }
 
     /**
@@ -105,8 +107,8 @@ public class GameClientHandler implements Runnable {
             Enemy enemy = enemyList.get(i);
             String type = enemy.getClass().getSimpleName().toLowerCase();
             enemies.append(type).append("(");
-            enemies.append((int)enemy.getX()).append(",");
-            enemies.append((int)enemy.getY()).append(")");
+            enemies.append(enemy.getX().doubleValue()).append(",");
+            enemies.append(enemy.getY().doubleValue()).append(")");
             
             if (i < enemyList.size() - 1) {
                 enemies.append(";");
@@ -125,12 +127,12 @@ public class GameClientHandler implements Runnable {
         StringBuilder fruits = new StringBuilder();
         java.util.ArrayList<Collectible> collectibleList = game.getCollectibles();
         
-        for (int i = 0; i < collectibleList.size(); i++) {
+        for (Integer i = 0; i < collectibleList.size(); i++) {
             Collectible collectible = collectibleList.get(i);
             String type = collectible.getClass().getSimpleName().toLowerCase();
             fruits.append(type).append("(");
-            fruits.append((int)collectible.getX()).append(",");
-            fruits.append((int)collectible.getY()).append(")");
+            fruits.append(collectible.getX().doubleValue()).append(",");
+            fruits.append(collectible.getY().doubleValue()).append(")");
             
             if (i < collectibleList.size() - 1) {
                 fruits.append(";");
@@ -214,11 +216,17 @@ public class GameClientHandler implements Runnable {
                 // Detectar colisiones
                 game.collisions();
                 
-                // Enviar estado del juego al cliente
-                sendGameState();
+                // Construir estado del juego
+                String gameState = buildGameState();
                 
-                // Mantener ~20 actualizaciones por segundo (50ms por frame)
-                Thread.sleep(50);
+                // Enviar estado del juego al cliente jugador
+                this.output.writeUTF(gameState);
+                
+                // Notificar a todos los espectadores (patrón Observer)
+                game.notifyObservers(gameState);
+                
+                // Mantener ~30 actualizaciones por segundo (32ms por frame)
+                Thread.sleep(32);
                 
             } catch (IOException e) {
                 this.connected = false;
@@ -249,7 +257,7 @@ public class GameClientHandler implements Runnable {
      * Obtiene el número de juego.
      * @return número del juego
      */
-    public int getGameNumber() {
+    public Integer getGameNumber() {
         return this.gameNumber;
     }
 }

@@ -1,5 +1,6 @@
 package sockets;
 
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -13,7 +14,7 @@ public class Server {
     private ServerSocket server;
     private ArrayList<Socket> clients = new ArrayList<>();
     private ArrayList<GameClientHandler> handlers = new ArrayList<>();
-    private int clientsIDs;
+    private Integer clientsIDs = 0;
     private ClientRegistrar registrar;
 
     /**
@@ -21,6 +22,7 @@ public class Server {
      */
     public interface ClientRegistrar {
         void registerClientHandler(GameClientHandler handler);
+        void registerSpectator(SpectatorHandler spectator, Integer gameNumber);
     }
 
     /**
@@ -49,21 +51,47 @@ public class Server {
             Socket client = this.server.accept();
             this.clients.add(client);
             assignID(client);
-            DataOutputStream temp = new DataOutputStream(client.getOutputStream());
-            temp.writeUTF("record" + " " + ";");
             
-            // Crear manejador de cliente para juego
+            // Leer el primer mensaje para determinar si es jugador o espectador
             try {
-                GameClientHandler handler = new GameClientHandler(client);
-                this.handlers.add(handler);
+                DataInputStream input = new DataInputStream(client.getInputStream());
+                DataOutputStream output = new DataOutputStream(client.getOutputStream());
                 
-                // Registrar el manejador con la aplicación
-                if (this.registrar != null) {
-                    this.registrar.registerClientHandler(handler);
+                // Enviar mensaje de bienvenida
+                output.writeUTF("record" + " " + ";");
+                
+                // Leer el primer comando del cliente
+                String firstMessage = input.readUTF();
+                System.out.println("Client first message: " + firstMessage);
+                
+                if (firstMessage.startsWith("spectate")) {
+                    // Es un espectador
+                    String[] tokens = firstMessage.split(" ");
+                    Integer gameNumber = 1; // Default
+                    if (tokens.length >= 2) {
+                        try {
+                            gameNumber = Integer.parseInt(tokens[1]);
+                        } catch (NumberFormatException e) {
+                            gameNumber = 1;
+                        }
+                    }
+                    
+                    SpectatorHandler spectator = new SpectatorHandler(client);
+                    if (this.registrar != null) {
+                        this.registrar.registerSpectator(spectator, gameNumber);
+                    }
+                } else {
+                    // Es un jugador normal
+                    GameClientHandler handler = new GameClientHandler(client);
+                    this.handlers.add(handler);
+                    
+                    if (this.registrar != null) {
+                        this.registrar.registerClientHandler(handler);
+                    }
+                    
+                    // Iniciar el hilo del manejador
+                    new Thread(handler).start();
                 }
-                
-                // Iniciar el hilo del manejador
-                new Thread(handler).start();
                 
                 System.out.println("Nuevo cliente conectado, es el #" + (this.clientsIDs - 1));
             } catch (IOException e) {

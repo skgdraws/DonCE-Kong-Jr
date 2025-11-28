@@ -79,9 +79,7 @@ void loadAssets(SDL_Renderer* renderer) {
     } else {
         // Cargar fuente
         gameFont = TTF_OpenFont("assets/font/kongtext.ttf", 8);
-        if (gameFont) {
-            SDL_Log("Fuente cargada correctamente");
-        } else {
+        if (!gameFont) {
             SDL_Log("Error al cargar fuente: %s", SDL_GetError());
         }
     }
@@ -94,7 +92,6 @@ void loadAssets(SDL_Renderer* renderer) {
         if (backgroundTexture) {
             // Configurar filtro nearest neighbor para la textura
             SDL_SetTextureScaleMode(backgroundTexture, SDL_SCALEMODE_NEAREST);
-            SDL_Log("Fondo cargado correctamente");
         } else {
             SDL_Log("Error al crear textura del fondo: %s", SDL_GetError());
         }
@@ -109,7 +106,6 @@ void loadAssets(SDL_Renderer* renderer) {
         SDL_DestroySurface(logoSurface);
         if (logoTexture) {
             SDL_SetTextureScaleMode(logoTexture, SDL_SCALEMODE_NEAREST);
-            SDL_Log("Logo cargado correctamente");
         } else {
             SDL_Log("Error al crear textura del logo: %s", SDL_GetError());
         }
@@ -124,7 +120,6 @@ void loadAssets(SDL_Renderer* renderer) {
         SDL_DestroySurface(lifeIconSurface);
         if (lifeIconTexture) {
             SDL_SetTextureScaleMode(lifeIconTexture, SDL_SCALEMODE_NEAREST);
-            SDL_Log("Icono de vida cargado correctamente");
         } else {
             SDL_Log("Error al crear textura del icono de vida: %s", SDL_GetError());
         }
@@ -139,7 +134,6 @@ void loadAssets(SDL_Renderer* renderer) {
         SDL_DestroySurface(playerSurface);
         if (playerSpritesheet) {
             SDL_SetTextureScaleMode(playerSpritesheet, SDL_SCALEMODE_NEAREST);
-            SDL_Log("Spritesheet del jugador cargado correctamente");
         } else {
             SDL_Log("Error al crear textura del spritesheet: %s", SDL_GetError());
         }
@@ -154,7 +148,6 @@ void loadAssets(SDL_Renderer* renderer) {
         SDL_DestroySurface(pointsSurface);
         if (pointsTexture) {
             SDL_SetTextureScaleMode(pointsTexture, SDL_SCALEMODE_NEAREST);
-            SDL_Log("Textura de puntos cargada correctamente");
         } else {
             SDL_Log("Error al crear textura de puntos: %s", SDL_GetError());
         }
@@ -169,7 +162,6 @@ void loadAssets(SDL_Renderer* renderer) {
         SDL_DestroySurface(marioSurface);
         if (marioTexture) {
             SDL_SetTextureScaleMode(marioTexture, SDL_SCALEMODE_NEAREST);
-            SDL_Log("Sprite de Mario cargado correctamente");
         } else {
             SDL_Log("Error al crear textura de Mario: %s", SDL_GetError());
         }
@@ -180,11 +172,13 @@ void loadAssets(SDL_Renderer* renderer) {
     // Cargar sprite de cocodrilo rojo
     SDL_Surface *gatorRedSurface = SDL_LoadBMP("assets/img/gator-red.bmp");
     if (gatorRedSurface) {
+        // Configurar color key para transparencia (negro = transparente)
+        SDL_SetSurfaceColorKey(gatorRedSurface, true, SDL_MapSurfaceRGB(gatorRedSurface, 0, 0, 0));
         gatorRedTexture = SDL_CreateTextureFromSurface(renderer, gatorRedSurface);
         SDL_DestroySurface(gatorRedSurface);
         if (gatorRedTexture) {
             SDL_SetTextureScaleMode(gatorRedTexture, SDL_SCALEMODE_NEAREST);
-            SDL_Log("Sprite de cocodrilo rojo cargado correctamente");
+            SDL_Log("Textura de cocodrilo rojo cargada correctamente");
         } else {
             SDL_Log("Error al crear textura de cocodrilo rojo: %s", SDL_GetError());
         }
@@ -195,11 +189,13 @@ void loadAssets(SDL_Renderer* renderer) {
     // Cargar sprite de cocodrilo azul
     SDL_Surface *gatorBlueSurface = SDL_LoadBMP("assets/img/gator-blue.bmp");
     if (gatorBlueSurface) {
+        // Configurar color key para transparencia (negro = transparente)
+        SDL_SetSurfaceColorKey(gatorBlueSurface, true, SDL_MapSurfaceRGB(gatorBlueSurface, 0, 0, 0));
         gatorBlueTexture = SDL_CreateTextureFromSurface(renderer, gatorBlueSurface);
         SDL_DestroySurface(gatorBlueSurface);
         if (gatorBlueTexture) {
             SDL_SetTextureScaleMode(gatorBlueTexture, SDL_SCALEMODE_NEAREST);
-            SDL_Log("Sprite de cocodrilo azul cargado correctamente");
+            SDL_Log("Textura de cocodrilo azul cargada correctamente");
         } else {
             SDL_Log("Error al crear textura de cocodrilo azul: %s", SDL_GetError());
         }
@@ -214,7 +210,6 @@ void loadAssets(SDL_Renderer* renderer) {
         SDL_DestroySurface(fruitSurface);
         if (fruitTexture) {
             SDL_SetTextureScaleMode(fruitTexture, SDL_SCALEMODE_NEAREST);
-            SDL_Log("Sprite de fruta cargado correctamente");
         } else {
             SDL_Log("Error al crear textura de fruta: %s", SDL_GetError());
         }
@@ -229,7 +224,6 @@ void loadAssets(SDL_Renderer* renderer) {
         SDL_DestroySurface(dkSurface);
         if (dkTexture) {
             SDL_SetTextureScaleMode(dkTexture, SDL_SCALEMODE_NEAREST);
-            SDL_Log("Sprite de DK cargado correctamente");
         } else {
             SDL_Log("Error al crear textura de DK: %s", SDL_GetError());
         }
@@ -244,7 +238,6 @@ void loadAssets(SDL_Renderer* renderer) {
         SDL_DestroySurface(cageSurface);
         if (cageTexture) {
             SDL_SetTextureScaleMode(cageTexture, SDL_SCALEMODE_NEAREST);
-            SDL_Log("Sprite de jaula cargado correctamente");
         } else {
             SDL_Log("Error al crear textura de jaula: %s", SDL_GetError());
         }

@@ -6,7 +6,7 @@ import java.util.StringTokenizer;
 
 public class Listener implements Runnable {
     private final DataInputStream input;
-    private boolean isReading = true;
+    private Boolean isReading = true;
 
     /**
      * Constructor de la clase.

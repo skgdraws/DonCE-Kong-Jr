@@ -6,29 +6,39 @@
 // Constantes de los enemigos
 #define MAX_ENEMIES 10
 #define ENEMY_SPEED 2.0f
-#define ENEMY_SIZE 24.0f
+#define ENEMY_SIZE 16.0f  // Tamaño del sprite de enemigo (16x16)
+
+/**
+ * @brief Tipos de enemigos en el juego
+ */
+typedef enum {
+    ENEMY_TYPE_RED = 0,   ///< Enemigo rojo (patrulla arriba/abajo)
+    ENEMY_TYPE_BLUE = 1   ///< Enemigo azul (gravedad)
+} EnemyType;
 
 /**
  * @brief Estructura que representa un enemigo en el juego
  */
 typedef struct {
-    float x;        ///< Posicion X del enemigo
-    float y;        ///< Posicion Y del enemigo
-    float velX;     ///< Velocidad horizontal
-    float velY;     ///< Velocidad vertical
-    float speed;    ///< Velocidad base del enemigo
-    float size;     ///< Tamaño del enemigo para colisiones
-    bool active;    ///< Estado de activacion del enemigo
+    float x;           ///< Posicion X del enemigo
+    float y;           ///< Posicion Y del enemigo
+    float velX;        ///< Velocidad horizontal
+    float velY;        ///< Velocidad vertical
+    float speed;       ///< Velocidad base del enemigo
+    float size;        ///< Tamaño del enemigo para colisiones
+    EnemyType type;    ///< Tipo de enemigo (rojo o azul)
+    int animFrame;     ///< Frame de animacion actual
+    bool active;       ///< Estado de activacion del enemigo
 } Enemy;
 
 /**
  * @brief Estructura de datos de enemigo recibida del servidor
  */
 typedef struct {
-    float x;        ///< Posicion X del enemigo
-    float y;        ///< Posicion Y del enemigo
-    int id;         ///< Identificador unico del enemigo
-    bool active;    ///< Estado de activacion del enemigo
+    float x;           ///< Posicion X del enemigo
+    float y;           ///< Posicion Y del enemigo
+    EnemyType type;    ///< Tipo de enemigo (rojo o azul)
+    bool active;       ///< Estado de activacion del enemigo
 } ServerEnemyData;
 
 /**

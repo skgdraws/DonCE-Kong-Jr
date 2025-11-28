@@ -4,3 +4,4 @@ src/client/Debug/*
 
 # Server Java stuff
 src/server/src/out/*
+*.class

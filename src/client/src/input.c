@@ -119,8 +119,33 @@ void handleGameInput(SDL_Event* event) {
 void handleSpectateMenuInput(SDL_Event* event) {
     if (event->type == SDL_EVENT_KEY_DOWN) {
         switch (event->key.key) {
-            case SDLK_ESCAPE:
+            case SDLK_UP:
+                selectedSpectateOption = (selectedSpectateOption - 1 + SPECTATE_COUNT) % SPECTATE_COUNT;
+                break;
+            case SDLK_DOWN:
+                selectedSpectateOption = (selectedSpectateOption + 1) % SPECTATE_COUNT;
+                break;
             case SDLK_RETURN:
+            case SDLK_SPACE:
+                switch (selectedSpectateOption) {
+                    case SPECTATE_GAME_1:
+                        spectatingGameNumber = 1;
+                        gameState = GAME_STATE_CONNECTING_SPECTATE;
+                        SDL_Log("Conectando para espectar Juego 1...");
+                        break;
+                    case SPECTATE_GAME_2:
+                        spectatingGameNumber = 2;
+                        gameState = GAME_STATE_CONNECTING_SPECTATE;
+                        SDL_Log("Conectando para espectar Juego 2...");
+                        break;
+                    case SPECTATE_BACK:
+                        gameState = GAME_STATE_MENU;
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case SDLK_ESCAPE:
                 gameState = GAME_STATE_MENU;
                 break;
         }
@@ -160,6 +185,19 @@ void handleSpectatingInput(SDL_Event* event) {
     }
 }
 
+void handleGameOverInput(SDL_Event* event) {
+    if (event->type == SDL_EVENT_KEY_DOWN) {
+        switch (event->key.key) {
+            case SDLK_SPACE:
+            case SDLK_RETURN:
+            case SDLK_ESCAPE:
+                // Volver al menú principal
+                gameState = GAME_STATE_MENU;
+                break;
+        }
+    }
+}
+
 void handleEvents(bool* running) {
     SDL_Event event;
     
@@ -185,6 +223,7 @@ void handleEvents(bool* running) {
                 handleCreditsInput(&event);
                 break;
             case GAME_STATE_CONNECTING:
+            case GAME_STATE_CONNECTING_SPECTATE:
                 handleConnectingInput(&event);
                 break;
             case GAME_STATE_PLAYING:
@@ -192,6 +231,9 @@ void handleEvents(bool* running) {
                 break;
             case GAME_STATE_SPECTATING:
                 handleSpectatingInput(&event);
+                break;
+            case GAME_STATE_GAME_OVER:
+                handleGameOverInput(&event);
                 break;
             case GAME_STATE_QUIT:
                 break;

@@ -23,6 +23,8 @@ void spawnEnemy(float x, float y, float velX, float velY) {
             enemies[i].velY = velY;
             enemies[i].speed = ENEMY_SPEED;
             enemies[i].size = ENEMY_SIZE;
+            enemies[i].type = ENEMY_TYPE_RED;  // Default a rojo
+            enemies[i].animFrame = 0;
             enemies[i].active = true;
             enemyCount++;
             SDL_Log("Enemigo spawneado en (%.0f, %.0f)", x, y);
@@ -46,6 +48,8 @@ void updateEnemiesFromServer(ServerEnemyData* serverEnemies, int count) {
             enemies[i].x = serverEnemies[i].x;
             enemies[i].y = serverEnemies[i].y;
             enemies[i].size = ENEMY_SIZE;
+            enemies[i].type = serverEnemies[i].type;
+            enemies[i].animFrame = 0;  // Reset animation frame
             enemies[i].active = true;
             enemyCount++;
         }

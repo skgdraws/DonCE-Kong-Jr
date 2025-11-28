@@ -15,7 +15,7 @@ public class ClientListener implements Runnable {
     public Socket client;
     private DataOutputStream output;
     private DataInputStream input;
-    private boolean open = true;
+    private Boolean open = true;
 
     /**
      * Constructor de la clase.
