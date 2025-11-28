@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Scanner;
 import java.util.ArrayList;
 
-public class App implements Server.ClientRegistrar {
+public class App implements Server.ClientRegistrar, GameClientHandler.DisconnectCallback {
     private Logic game1; // Primera instancia del juego
     private Logic game2; // Segunda instancia del juego
     private Scanner scanner; // Escáner para entrada de usuario
@@ -228,15 +228,17 @@ public class App implements Server.ClientRegistrar {
      * @param handler manejador del cliente a registrar
      */
     public void registerClientHandler(GameClientHandler handler) {
-        if (this.handler1 == null) {
+        if (this.handler1 == null || !this.handler1.isConnected()) {
             this.handler1 = handler;
             handler.setGame(this.game1);
             handler.setGameNumber(1);
+            handler.setDisconnectCallback(this);
             System.out.println("Client connected to Game 1 as player");
-        } else if (this.handler2 == null) {
+        } else if (this.handler2 == null || !this.handler2.isConnected()) {
             this.handler2 = handler;
             handler.setGame(this.game2);
             handler.setGameNumber(2);
+            handler.setDisconnectCallback(this);
             System.out.println("Client connected to Game 2 as player");
         } else {
             // Ambos juegos están llenos, rechazar conexión como jugador
@@ -262,6 +264,26 @@ public class App implements Server.ClientRegistrar {
         new Thread(spectator).start();
         
         System.out.println("Spectator connected to Game " + gameNumber + " (Observer pattern)");
+    }
+
+    /**
+     * Maneja la desconexión de un jugador, reseteando el juego para permitir nuevos jugadores.
+     * Implementación de DisconnectCallback.
+     * @param gameNumber número del juego del que se desconectó el jugador
+     */
+    @Override
+    public void onPlayerDisconnect(Integer gameNumber) {
+        System.out.println("Player disconnected from Game " + gameNumber + ", resetting room...");
+        
+        if (gameNumber == 1) {
+            this.handler1 = null;
+            this.game1.reset();
+            System.out.println("Game 1 is now available for new players");
+        } else if (gameNumber == 2) {
+            this.handler2 = null;
+            this.game2.reset();
+            System.out.println("Game 2 is now available for new players");
+        }
     }
 
     /**

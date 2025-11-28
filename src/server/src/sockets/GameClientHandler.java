@@ -18,6 +18,14 @@ public class GameClientHandler implements Runnable {
     private Integer gameNumber;
     private Boolean connected = true;
     private static final String GAME_STATE_SEPARATOR = "|";
+    private DisconnectCallback disconnectCallback;
+
+    /**
+     * Interfaz para notificar cuando un jugador se desconecta.
+     */
+    public interface DisconnectCallback {
+        void onPlayerDisconnect(Integer gameNumber);
+    }
 
     /**
      * Constructor de la clase.
@@ -44,6 +52,14 @@ public class GameClientHandler implements Runnable {
      */
     public void setGameNumber(int gameNumber) {
         this.gameNumber = gameNumber;
+    }
+
+    /**
+     * Asigna el callback de desconexión.
+     * @param callback callback a llamar cuando el jugador se desconecte
+     */
+    public void setDisconnectCallback(DisconnectCallback callback) {
+        this.disconnectCallback = callback;
     }
 
     /**
@@ -243,6 +259,22 @@ public class GameClientHandler implements Runnable {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+
+        // Cerrar el socket para liberar recursos
+        try {
+            if (!this.client.isClosed()) {
+                this.client.close();
+            }
+        } catch (IOException e) {
+            System.err.println("Error closing client socket: " + e.getMessage());
+        }
+
+        // Notificar desconexión para liberar el slot del juego
+        if (this.disconnectCallback != null) {
+            this.disconnectCallback.onPlayerDisconnect(this.gameNumber);
+        }
+        
+        System.out.println("Game " + gameNumber + " handler thread terminated");
     }
 
     /**

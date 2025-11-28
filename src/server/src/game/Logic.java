@@ -84,6 +84,20 @@ public class Logic implements GameSubject {
     }
 
     /**
+     * Reinicia completamente el estado del juego.
+     * Limpia enemigos, coleccionables y reinicia el jugador.
+     */
+    public void reset() {
+        this.level = 1;
+        this.enemies.clear();
+        this.collectibles.clear();
+        this.player.lives = 3;
+        this.player.score = 0;
+        this.setPlayer();
+        System.out.println("Game reset to initial state");
+    }
+
+    /**
      * Ejecuta el bucle principal del juego.
      * Aplica gravedad, actualiza el jugador y verifica colisiones mientras el jugador tenga vidas.
      */
