@@ -69,7 +69,7 @@ SDL_Texture* getCageTexture(void) {
     return cageTexture;
 }
 
-void loadAssets(SDL_Renderer* renderer) {
+void loadAssets(SDL_Renderer* renderer, SDL_Window* window) {
     // Establecer filtro de escalado a nearest neighbor para pixeles nitidos
     SDL_SetHint("SDL_RENDER_SCALE_QUALITY", "0");
 
@@ -116,6 +116,9 @@ void loadAssets(SDL_Renderer* renderer) {
     // Cargar icono de vida
     SDL_Surface *lifeIconSurface = SDL_LoadBMP("assets/img/life-icon.bmp");
     if (lifeIconSurface) {
+        // Establecer como icono de la ventana
+        SDL_SetWindowIcon(window, lifeIconSurface);
+        
         lifeIconTexture = SDL_CreateTextureFromSurface(renderer, lifeIconSurface);
         SDL_DestroySurface(lifeIconSurface);
         if (lifeIconTexture) {

@@ -7,8 +7,9 @@
 /**
  * @brief Carga todos los assets del juego (texturas, sprites, fuentes)
  * @param renderer Puntero al renderer de SDL para crear las texturas
+ * @param window Puntero a la ventana de SDL para establecer el icono
  */
-void loadAssets(SDL_Renderer* renderer);
+void loadAssets(SDL_Renderer* renderer, SDL_Window* window);
 
 /**
  * @brief Libera todos los assets cargados de la memoria

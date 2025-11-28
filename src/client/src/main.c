@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
 
     SDL_SetRenderLogicalPresentation(renderer, 224, 256, SDL_LOGICAL_PRESENTATION_LETTERBOX);
 
-    loadAssets(renderer);
+    loadAssets(renderer, window);
 
     // Loop principal del juego
     while (running) {
