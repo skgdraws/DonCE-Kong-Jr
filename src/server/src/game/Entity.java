@@ -61,4 +61,12 @@ public abstract class Entity {
     public Integer getHeight() {
         return this.height;
     }
+
+    /**
+     * Obtiene la velocidad vertical de la entidad.
+     * @return velocidad en Y
+     */
+    public Double getVY() {
+        return this.vy;
+    }
 }

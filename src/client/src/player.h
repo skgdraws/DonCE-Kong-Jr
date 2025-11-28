@@ -13,8 +13,9 @@
 #define SPRITE_IDLE_1 1
 #define SPRITE_WALK_1 2
 #define SPRITE_WALK_2 3
-#define SPRITE_JUMP 4
-#define SPRITE_FALL 5
+#define SPRITE_WALK_3 4
+#define SPRITE_JUMP 5
+#define SPRITE_FALL 6
 #define SPRITE_CLIMB_1 7
 #define SPRITE_CLIMB_2 8
 
@@ -26,7 +27,8 @@ typedef struct {
     float y;              ///< Posicion Y del jugador
     int lives;            ///< Vidas del jugador
     int score;            ///< Puntuacion del jugador
-    const char* state;    ///< Estado del jugador ("idle", "walking", "climbing")
+    const char* state;    ///< Estado del jugador ("idle", "walking", "climbing", "jumping")
+    const char* facing;   ///< Direccion hacia la que mira ("left", "right")
 } ServerPlayerData;
 
 /**
@@ -42,6 +44,7 @@ typedef struct {
     int score;          ///< Puntuacion del jugador
     int spriteIndex;    ///< Indice del sprite actual
     int animCounter;    ///< Contador de frames de animacion
+    bool facingRight;   ///< true si mira a la derecha, false si mira a la izquierda
 } Player;
 
 /**

@@ -51,6 +51,7 @@ void updateEnemiesFromServer(ServerEnemyData* serverEnemies, int count) {
             enemies[i].type = serverEnemies[i].type;
             enemies[i].animFrame = 0;  // Reset animation frame
             enemies[i].active = true;
+            enemies[i].movingUp = serverEnemies[i].movingUp;
             enemyCount++;
         }
     }

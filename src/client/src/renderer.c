@@ -183,7 +183,9 @@ void renderGame(SDL_Renderer* renderer) {
             32,  // 32x16 at native resolution
             16
         };
-        SDL_RenderTexture(renderer, playerSpritesheet, &srcRect, &dstRect);
+        // Voltear horizontalmente si el jugador mira hacia la derecha
+        SDL_FlipMode flip = player->facingRight ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
+        SDL_RenderTextureRotated(renderer, playerSpritesheet, &srcRect, &dstRect, 0, NULL, flip);
     } else {
         // Fallback: dibujar rectangulo si no hay sprite
         SDL_FRect playerRect = {player->x, player->y, 32, 16};
@@ -230,7 +232,12 @@ void renderGame(SDL_Renderer* renderer) {
                     16.0f,
                     16.0f
                 };
-                SDL_RenderTexture(renderer, enemyTexture, &srcRect, &dstRect);
+                // Voltear verticalmente si es enemigo rojo y se mueve hacia arriba
+                SDL_FlipMode flip = SDL_FLIP_NONE;
+                if (enemies[i].type == ENEMY_TYPE_RED && enemies[i].movingUp) {
+                    flip = SDL_FLIP_VERTICAL;
+                }
+                SDL_RenderTextureRotated(renderer, enemyTexture, &srcRect, &dstRect, 0, NULL, flip);
             } else {
                 // Fallback: dibujar rectangulo coloreado segun tipo
                 if (enemies[i].type == ENEMY_TYPE_RED) {

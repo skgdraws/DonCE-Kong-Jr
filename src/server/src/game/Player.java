@@ -11,7 +11,9 @@ public class Player extends Entity {
     protected Integer score; // Puntuación del jugador
     protected Boolean onGround; // Indica si está en el suelo
     protected Boolean climbing; // Indica si está escalando una liana
+    protected Boolean jumping; // Indica si está en medio de un salto
     protected String currentDirection; //Indica la dirección actual del jugador
+    protected String lastHorizontalDirection; // Última dirección horizontal para el sprite
 
     /**
      * Constructor del jugador.
@@ -22,7 +24,9 @@ public class Player extends Entity {
         this.score = 0;
         this.onGround = false;
         this.climbing = false;
+        this.jumping = false;
         this.currentDirection = "none";
+        this.lastHorizontalDirection = "left";
         this.width = 16;
         this.height = 16;
         this.vx = 0.0;
@@ -48,11 +52,21 @@ public class Player extends Entity {
     public String getState() {
         if (this.climbing) {
             return "climbing";
+        } else if (this.jumping || !this.onGround) {
+            return "jumping";
         } else if (Math.abs(this.vx) > 0.5) {
             return "walking";
         } else {
             return "idle";
         }
+    }
+
+    /**
+     * Obtiene la dirección hacia la que mira el jugador.
+     * @return "right" si mira a la derecha, "left" si mira a la izquierda
+     */
+    public String getFacingDirection() {
+        return this.lastHorizontalDirection;
     }
 
     /**
@@ -79,6 +93,7 @@ public class Player extends Entity {
             this.vy = -5.0;
             this.onGround = false;
             this.climbing = false;
+            this.jumping = true;
         }
     }
 
@@ -106,6 +121,12 @@ public class Player extends Entity {
         Double climbSpeed = 2.0; // Constant climbing speed
 
         this.currentDirection = direction;
+        
+        // Guardar la última dirección horizontal para el sprite
+        if (direction.equals("left") || direction.equals("right")) {
+            this.lastHorizontalDirection = direction;
+        }
+        
         switch (direction) {
             case "up":
                 if (this.climbing) {

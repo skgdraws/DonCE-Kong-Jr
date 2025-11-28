@@ -91,13 +91,14 @@ public class GameClientHandler implements Runnable {
         gameState.append("STATE").append(GAME_STATE_SEPARATOR);
         gameState.append(gameNumber).append(GAME_STATE_SEPARATOR);
         
-        // Send player information
+        // Send player information (added facing direction)
         gameState.append("PLAYER").append(GAME_STATE_SEPARATOR);
         gameState.append(game.getPlayer().getX()).append(",");
         gameState.append(game.getPlayer().getY()).append(",");
         gameState.append(game.getPlayer().getLives()).append(",");
         gameState.append(game.getPlayer().getScore()).append(",");
-        gameState.append(game.getPlayer().getState()).append(GAME_STATE_SEPARATOR);
+        gameState.append(game.getPlayer().getState()).append(",");
+        gameState.append(game.getPlayer().getFacingDirection()).append(GAME_STATE_SEPARATOR);
         
         // Send enemies information with type and position
         gameState.append("ENEMIES").append(GAME_STATE_SEPARATOR);
@@ -111,8 +112,9 @@ public class GameClientHandler implements Runnable {
     }
 
     /**
-     * Construye una lista de enemigos con su tipo y posición.
-     * Formato: enemy_type(x,y);enemy_type(x,y);...
+     * Construye una lista de enemigos con su tipo, posición y dirección.
+     * Formato: enemy_type(x,y,dir);enemy_type(x,y,dir);...
+     * dir: "up" si vy < 0, "down" si vy >= 0
      * @return string con la información de enemigos
      */
     private String buildEnemiesList() {
@@ -122,9 +124,11 @@ public class GameClientHandler implements Runnable {
         for (int i = 0; i < enemyList.size(); i++) {
             Enemy enemy = enemyList.get(i);
             String type = enemy.getClass().getSimpleName().toLowerCase();
+            String direction = (enemy.getVY() < 0) ? "up" : "down";
             enemies.append(type).append("(");
             enemies.append(enemy.getX().doubleValue()).append(",");
-            enemies.append(enemy.getY().doubleValue()).append(")");
+            enemies.append(enemy.getY().doubleValue()).append(",");
+            enemies.append(direction).append(")");
             
             if (i < enemyList.size() - 1) {
                 enemies.append(";");

@@ -14,7 +14,8 @@ static Player player = {
     .lives = 3,
     .score = 0,
     .spriteIndex = SPRITE_IDLE_1,
-    .animCounter = 0
+    .animCounter = 0,
+    .facingRight = false  // Por defecto mira a la izquierda
 };
 
 Player* getPlayer(void) {
@@ -29,6 +30,11 @@ void updatePlayerFromServer(ServerPlayerData* serverData) {
     // Actualizar vidas y puntuacion
     player.lives = serverData->lives;
     player.score = serverData->score;
+    
+    // Actualizar direccion hacia la que mira
+    if (serverData->facing != NULL) {
+        player.facingRight = (strcmp(serverData->facing, "right") == 0);
+    }
     
     // Verificar si las vidas llegaron a negativo (game over)
     if (player.lives < 0) {
@@ -53,13 +59,15 @@ void updatePlayerFromServer(ServerPlayerData* serverData) {
     // Determinar sprite base segun el estado del servidor
     int baseSprite;
     bool isMoving = false;
+    bool isSingleFrame = false;  // Para estados que no tienen animacion de 2 frames
     
     if (strcmp(serverData->state, "walking") == 0) {
         baseSprite = SPRITE_WALK_1;
         isMoving = true;
     } else if (strcmp(serverData->state, "jumping") == 0) {
         baseSprite = SPRITE_JUMP;
-        isMoving = true;
+        isMoving = false;
+        isSingleFrame = true;
     } else if (strcmp(serverData->state, "climbing") == 0) {
         baseSprite = SPRITE_CLIMB_1;
         isMoving = true;
@@ -73,7 +81,11 @@ void updatePlayerFromServer(ServerPlayerData* serverData) {
     }
     
     // Actualizar animacion
-    if (isMoving) {
+    if (isSingleFrame) {
+        // Estados de un solo frame (salto)
+        player.spriteIndex = baseSprite;
+        player.animCounter = 0;
+    } else if (isMoving) {
         player.animCounter++;
         if (player.animCounter >= ANIMATION_SPEED) {
             player.animCounter = 0;

@@ -63,15 +63,17 @@ static void parseGameState(const char* data, int dataLength) {
                 float x, y;
                 int lives, score;
                 char state[32];
-                int parsed = sscanf(playerData, "%f,%f,%d,%d,%31s", &x, &y, &lives, &score, state);
+                char facing[32];
+                int parsed = sscanf(playerData, "%f,%f,%d,%d,%31[^,],%31s", &x, &y, &lives, &score, state, facing);
                 
-                if (parsed == 5) {
+                if (parsed >= 5) {
                     ServerPlayerData serverPlayer = {
                         .x = x,
                         .y = y,
                         .lives = lives,
                         .score = score,
-                        .state = state
+                        .state = state,
+                        .facing = (parsed >= 6) ? facing : "left"
                     };
                     updatePlayerFromServer(&serverPlayer);
                 }
@@ -118,12 +120,14 @@ static void parseGameState(const char* data, int dataLength) {
                         strncpy(type, ptr, typeLen);
                         type[typeLen] = '\0';
                         
-                        // Parsear x,y dentro de los parentesis (servidor envia floats)
+                        // Parsear x,y,dir dentro de los parentesis (servidor envia floats y direccion)
                         float x, y;
-                        if (sscanf(paren, "(%f,%f)", &x, &y) == 2) {
+                        char dir[16] = {0};
+                        if (sscanf(paren, "(%f,%f,%15[^)])", &x, &y, dir) >= 2) {
                             serverEnemies[enemyCount].x = x;
                             serverEnemies[enemyCount].y = y;
                             serverEnemies[enemyCount].active = true;
+                            serverEnemies[enemyCount].movingUp = (strcmp(dir, "up") == 0);
                             
                             // Determinar el tipo de enemigo
                             if (strstr(type, "red") != NULL) {

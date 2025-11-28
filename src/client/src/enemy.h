@@ -29,6 +29,7 @@ typedef struct {
     EnemyType type;    ///< Tipo de enemigo (rojo o azul)
     int animFrame;     ///< Frame de animacion actual
     bool active;       ///< Estado de activacion del enemigo
+    bool movingUp;     ///< true si se mueve hacia arriba, false si hacia abajo
 } Enemy;
 
 /**
@@ -39,6 +40,7 @@ typedef struct {
     float y;           ///< Posicion Y del enemigo
     EnemyType type;    ///< Tipo de enemigo (rojo o azul)
     bool active;       ///< Estado de activacion del enemigo
+    bool movingUp;     ///< true si se mueve hacia arriba
 } ServerEnemyData;
 
 /**

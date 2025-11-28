@@ -165,6 +165,7 @@ public class Logic implements GameSubject {
                     this.player.y = platform.y - this.player.height;
                     this.player.vy = 0.0;
                     this.player.onGround = true;
+                    this.player.jumping = false;
                 } else if (minOverlap == overlapBottom && this.player.vy <= 0) {
                     // Colliding from bottom (player hitting ceiling)
                     this.player.y = platform.y + platform.height;
@@ -201,6 +202,7 @@ public class Logic implements GameSubject {
                     this.player.y = platformTop - this.player.height;
                     this.player.vy = 0.0;
                     this.player.onGround = true;
+                    this.player.jumping = false;
                     break;
                 }
             }

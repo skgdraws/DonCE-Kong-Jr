@@ -26,12 +26,16 @@ DonCE-Kong-Jr es un juego multijugador inspirado en el clásico Donkey Kong Jr. 
 ## ✨ Características
 
 - 🎯 **Arquitectura Cliente-Servidor**: Comunicación mediante sockets TCP/IP (puerto 2121)
-- 👥 **Multijugador**: Soporte para múltiples clientes simultáneos
+- 👥 **Multijugador**: Soporte para 2 juegos simultáneos con múltiples espectadores
+- 👁️ **Modo Espectador**: Observa partidas en curso usando el patrón Observer
 - 🎨 **Renderizado con SDL3**: Ventana 512x448 con presentación lógica y letterboxing
 - 🎮 **Sistema de Animación**: Frames animados para personajes (idle, corriendo, saltando, escalando)
+- 👾 **Enemigos Dinámicos**: Cocodrilos rojos y azules con IA de patrulla
+- 🍎 **Frutas Coleccionables**: Naranjas, bananas y fresas con sistema de puntuación
 - 🏗️ **Arquitectura Modular**: Cliente dividido en 10 módulos independientes
 - 🌐 **Networking Asíncrono**: Sockets no bloqueantes con Winsock2
-- 📊 **Menú Principal**: Sistema de navegación por teclado
+- 📊 **Menú Principal**: Sistema de navegación por teclado con opciones de jugar/espectar
+- 🔄 **Reset Automático**: Las salas se reinician cuando un jugador se desconecta
 - 🎨 **Assets Completos**: 11 sprites BMP + fuente personalizada Kong Text
 
 ## 🏗️ Arquitectura
@@ -63,16 +67,26 @@ DonCE-Kong-Jr/
 │       └── src/
 │           ├── App.java              # Aplicación principal
 │           ├── game/                 # Lógica del juego
-│           │   ├── Logic.java        # Lógica principal
+│           │   ├── Logic.java        # Lógica principal + GameSubject
 │           │   ├── Player.java       # Entidad jugador
-│           │   ├── Enemy.java        # Sistema de enemigos
+│           │   ├── Enemy.java        # Clase base enemigos
+│           │   ├── RedEnemy.java     # Cocodrilo rojo
+│           │   ├── BlueEnemy.java    # Cocodrilo azul
+│           │   ├── EnemyFactory.java # Factory para enemigos
 │           │   ├── Entity.java       # Clase base
 │           │   ├── Platform.java     # Plataformas
 │           │   ├── Vine.java         # Enredaderas
-│           │   └── Collectible.java  # Items coleccionables
+│           │   ├── Collectible.java  # Clase base coleccionables
+│           │   ├── Orange.java       # Naranja
+│           │   ├── Banana.java       # Banana
+│           │   ├── Strawberry.java   # Fresa
+│           │   ├── CollectibleFactory.java # Factory para frutas
+│           │   ├── GameObserver.java # Interfaz Observer
+│           │   └── GameSubject.java  # Interfaz Subject
 │           └── sockets/              # Sistema de red
 │               ├── Server.java       # Servidor TCP
-│               ├── GameClientHandler.java
+│               ├── GameClientHandler.java # Handler de jugadores
+│               ├── SpectatorHandler.java  # Handler de espectadores
 │               └── Client.java
 │
 └── docs/               # Documentación del proyecto
@@ -172,14 +186,21 @@ cd src/client/build
 # Terminal 1 - Iniciar servidor (Java)
 cd src/server/src
 java App
+# Comandos disponibles en el servidor:
+#   create_enemy <game> <type> <vine>  - Crear enemigo (type: red, blue)
+#   create_fruit <game> <type> <vine> <y> <value> - Crear fruta
+#   status - Ver estado de los juegos
+#   exit - Salir
 
-# Terminal 2 - Iniciar cliente 1 (C)
+# Terminal 2 - Iniciar cliente 1 como jugador
 cd src/client
 .\main.exe
+# Seleccionar "Play" en el menú
 
-# Terminal 3 - Iniciar cliente 2 (C)
+# Terminal 3 - Iniciar cliente 2 como espectador
 cd src/client
 .\main.exe
+# Seleccionar "Spectate Game 1" para observar
 ```
 
 ## 🎯 Controles del Juego
@@ -187,14 +208,18 @@ cd src/client
 ### Menú Principal
 - **↑/↓**: Navegar opciones
 - **Enter**: Seleccionar opción
+- **Opciones**: Jugar, Espectar Juego 1, Espectar Juego 2
 
 ### En Juego
-- **W/↑**: Subir
+- **W/↑**: Subir / Escalar
 - **A/←**: Mover izquierda
-- **S/↓**: Bajar
+- **S/↓**: Bajar / Descender
 - **D/→**: Mover derecha
 - **Espacio**: Saltar
 - **ESC**: Volver al menú
+
+### Modo Espectador
+- **ESC**: Desconectarse y volver al menú
 
 ## 📚 Documentación
 
@@ -217,6 +242,7 @@ Para más detalles sobre el desarrollo del proyecto, consulta las bitácoras:
 - ServerSocket (java.net)
 - Multithreading
 - Factory Pattern para entidades
+- Observer Pattern para espectadores
 
 ## 🛠️ Desarrollo
 
@@ -236,11 +262,12 @@ El cliente está modularizado en componentes independientes:
 
 ### Estructura de Comunicación
 
-- **Protocolo**: TCP/IP
+- **Protocolo**: TCP/IP con formato Java writeUTF (2-byte length prefix)
 - **Puerto**: 2121
-- **Formato**: Mensajes de texto
+- **Formato de Estado**: `STATE|gameNum|PLAYER|x,y,lives,score,state|ENEMIES|list|FRUITS|list`
+- **Comandos Cliente→Servidor**: `play`, `spectate X`, `move_left`, `move_right`, `jump`, `climb_up`, `climb_down`, `stop`
 - **Cliente**: Sockets no bloqueantes (FIONBIO)
-- **Servidor**: Multithreading con GameClientHandler por cliente
+- **Servidor**: Multithreading con GameClientHandler por jugador, SpectatorHandler por espectador
 
 ### Compilación en Modo Debug
 
@@ -316,23 +343,23 @@ Este proyecto fue desarrollado con fines educativos.
 
 ## 📊 Estado del Proyecto
 
-**Versión Actual**: 1.0.0 (En desarrollo)
+**Versión Actual**: 1.0.0 (Funcional)
 
 **Completado:**
 - ✅ Configuración del entorno de desarrollo
 - ✅ Sistema de renderizado con SDL3
-- ✅ Arquitectura modular del cliente
+- ✅ Arquitectura modular del cliente (10 módulos)
 - ✅ Sistema de animación por frames
-- ✅ Menú principal funcional
-- ✅ Módulo de networking básico
-- ✅ Servidor Java con manejo de múltiples clientes
-
-**En Desarrollo:**
-- 🔄 Protocolo de comunicación cliente-servidor
-- 🔄 Sincronización de estado del juego
-- 🔄 Lógica completa de enemigos
-- 🔄 Sistema de colisiones
-- 🔄 Sistema de puntuación
+- ✅ Menú principal funcional con opciones de jugar/espectar
+- ✅ Módulo de networking completo con protocolo definido
+- ✅ Servidor Java con manejo de 2 juegos simultáneos
+- ✅ Protocolo de comunicación cliente-servidor bidireccional
+- ✅ Sincronización de estado del juego (jugador, enemigos, frutas)
+- ✅ Sistema de enemigos con IA de patrulla
+- ✅ Sistema de colisiones (plataformas, lianas, enemigos, frutas)
+- ✅ Sistema de puntuación y vidas
+- ✅ Modo espectador con patrón Observer
+- ✅ Reset automático de salas al desconectarse
 
 **Pendiente:**
 - ⏳ Niveles adicionales
