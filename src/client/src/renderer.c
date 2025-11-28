@@ -495,12 +495,12 @@ void renderConnecting(SDL_Renderer* renderer) {
 
 void renderGameOver(SDL_Renderer* renderer) {
     // Limpiar pantalla con color oscuro
-    SDL_SetRenderDrawColor(renderer, 20, 20, 20, 255);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
     TTF_Font* font = getGameFont();
-    SDL_Color titleColor = {255, 50, 50, 255};    // Rojo para "GAME OVER"
-    SDL_Color textColor = {255, 255, 255, 255};   // Blanco para el texto
+    SDL_Color titleColor = {255, 50,  50,  255};  // Rojo para "GAME OVER"
+    SDL_Color textColor  = {255, 255, 255, 255};  // Blanco para el texto
     SDL_Color scoreColor = {255, 255, 100, 255};  // Amarillo para el puntaje
 
     if (font) {
