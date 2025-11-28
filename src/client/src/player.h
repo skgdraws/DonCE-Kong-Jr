@@ -4,7 +4,6 @@
 #include <stdbool.h>
 
 // Constantes del jugador
-#define PLAYER_SPEED 3.0f
 #define PLAYER_SIZE 32.0f
 #define PLAYER_SPRITE_WIDTH 32
 #define PLAYER_SPRITE_HEIGHT 16
@@ -14,6 +13,8 @@
 #define SPRITE_IDLE_1 1
 #define SPRITE_WALK_1 2
 #define SPRITE_WALK_2 3
+#define SPRITE_JUMP 4
+#define SPRITE_FALL 5
 #define SPRITE_CLIMB_1 7
 #define SPRITE_CLIMB_2 8
 
@@ -23,6 +24,8 @@
 typedef struct {
     float x;              ///< Posicion X del jugador
     float y;              ///< Posicion Y del jugador
+    int lives;            ///< Vidas del jugador
+    int score;            ///< Puntuacion del jugador
     const char* state;    ///< Estado del jugador ("idle", "walking", "climbing")
 } ServerPlayerData;
 
@@ -32,7 +35,11 @@ typedef struct {
 typedef struct {
     float x;            ///< Posicion X en pantalla
     float y;            ///< Posicion Y en pantalla
+    float offsetX;     ///< Offset X para suavizado de movimiento
+    float offsetY;     ///< Offset Y para suavizado de movimiento
     float size;         ///< Tamaño para colisiones
+    int lives;          ///< Vidas del jugador
+    int score;          ///< Puntuacion del jugador
     int spriteIndex;    ///< Indice del sprite actual
     int animCounter;    ///< Contador de frames de animacion
 } Player;

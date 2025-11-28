@@ -27,4 +27,22 @@ void renderMenu(SDL_Renderer* renderer);
  */
 void renderGame(SDL_Renderer* renderer);
 
+/**
+ * @brief Renderiza la pantalla de espectador
+ * 
+ * Muestra el juego con un indicador de "SPECTATING".
+ * 
+ * @param renderer Puntero al renderer de SDL
+ */
+void renderSpectating(SDL_Renderer* renderer);
+
+/**
+ * @brief Renderiza la pantalla de game over
+ * 
+ * Muestra "GAME OVER" y el puntaje final del jugador.
+ * 
+ * @param renderer Puntero al renderer de SDL
+ */
+void renderGameOver(SDL_Renderer* renderer);
+
 #endif // RENDERER_H

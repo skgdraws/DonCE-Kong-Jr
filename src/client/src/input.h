@@ -25,4 +25,10 @@ void handleMenuInput(SDL_Event* event);
  */
 void handleGameInput(SDL_Event* event);
 
+/**
+ * @brief Maneja la entrada del usuario en la pantalla de game over
+ * @param event Evento de SDL a procesar
+ */
+void handleGameOverInput(SDL_Event* event);
+
 #endif // INPUT_H

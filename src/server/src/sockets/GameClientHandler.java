@@ -7,16 +7,25 @@ import java.io.IOException;
 import java.net.Socket;
 
 /**
- * Clase que maneja la comunicación entre un cliente y un juego específico.
+ * Clase que maneja la comunicación entre un cliente jugador y un juego específico.
+ * Los espectadores son manejados por SpectatorHandler usando el patrón Observer.
  */
 public class GameClientHandler implements Runnable {
     private Socket client;
     private DataOutputStream output;
     private DataInputStream input;
     private Logic game;
-    private int gameNumber;
-    private boolean connected = true;
+    private Integer gameNumber;
+    private Boolean connected = true;
     private static final String GAME_STATE_SEPARATOR = "|";
+    private DisconnectCallback disconnectCallback;
+
+    /**
+     * Interfaz para notificar cuando un jugador se desconecta.
+     */
+    public interface DisconnectCallback {
+        void onPlayerDisconnect(Integer gameNumber);
+    }
 
     /**
      * Constructor de la clase.
@@ -46,10 +55,18 @@ public class GameClientHandler implements Runnable {
     }
 
     /**
+     * Asigna el callback de desconexión.
+     * @param callback callback a llamar cuando el jugador se desconecte
+     */
+    public void setDisconnectCallback(DisconnectCallback callback) {
+        this.disconnectCallback = callback;
+    }
+
+    /**
      * Verifica si el cliente está conectado.
      * @return true si está conectado
      */
-    public boolean isConnected() {
+    public Boolean isConnected() {
         return this.connected;
     }
 
@@ -66,9 +83,10 @@ public class GameClientHandler implements Runnable {
     }
 
     /**
-     * Envía el estado actual del juego al cliente.
+     * Construye el estado actual del juego como string.
+     * @return estado del juego serializado
      */
-    private void sendGameState() throws IOException {
+    private String buildGameState() {
         StringBuilder gameState = new StringBuilder();
         gameState.append("STATE").append(GAME_STATE_SEPARATOR);
         gameState.append(gameNumber).append(GAME_STATE_SEPARATOR);
@@ -78,7 +96,8 @@ public class GameClientHandler implements Runnable {
         gameState.append(game.getPlayer().getX()).append(",");
         gameState.append(game.getPlayer().getY()).append(",");
         gameState.append(game.getPlayer().getLives()).append(",");
-        gameState.append(game.getPlayer().getScore()).append(GAME_STATE_SEPARATOR);
+        gameState.append(game.getPlayer().getScore()).append(",");
+        gameState.append(game.getPlayer().getState()).append(GAME_STATE_SEPARATOR);
         
         // Send enemies information with type and position
         gameState.append("ENEMIES").append(GAME_STATE_SEPARATOR);
@@ -88,7 +107,7 @@ public class GameClientHandler implements Runnable {
         gameState.append("FRUITS").append(GAME_STATE_SEPARATOR);
         gameState.append(buildFruitsList());
         
-        this.output.writeUTF(gameState.toString());
+        return gameState.toString();
     }
 
     /**
@@ -104,8 +123,8 @@ public class GameClientHandler implements Runnable {
             Enemy enemy = enemyList.get(i);
             String type = enemy.getClass().getSimpleName().toLowerCase();
             enemies.append(type).append("(");
-            enemies.append((int)enemy.getX()).append(",");
-            enemies.append((int)enemy.getY()).append(")");
+            enemies.append(enemy.getX().doubleValue()).append(",");
+            enemies.append(enemy.getY().doubleValue()).append(")");
             
             if (i < enemyList.size() - 1) {
                 enemies.append(";");
@@ -124,12 +143,12 @@ public class GameClientHandler implements Runnable {
         StringBuilder fruits = new StringBuilder();
         java.util.ArrayList<Collectible> collectibleList = game.getCollectibles();
         
-        for (int i = 0; i < collectibleList.size(); i++) {
+        for (Integer i = 0; i < collectibleList.size(); i++) {
             Collectible collectible = collectibleList.get(i);
             String type = collectible.getClass().getSimpleName().toLowerCase();
             fruits.append(type).append("(");
-            fruits.append((int)collectible.getX()).append(",");
-            fruits.append((int)collectible.getY()).append(")");
+            fruits.append(collectible.getX().doubleValue()).append(",");
+            fruits.append(collectible.getY().doubleValue()).append(")");
             
             if (i < collectibleList.size() - 1) {
                 fruits.append(";");
@@ -182,20 +201,48 @@ public class GameClientHandler implements Runnable {
     public void run() {
         System.out.println("Game " + gameNumber + " handler started");
         
+        // Thread separado para recibir comandos
+        Thread inputThread = new Thread(() -> {
+            while (this.connected) {
+                try {
+                    String message = this.input.readUTF();
+                    System.out.println("Game " + gameNumber + " received: " + message);
+                    processCommand(message);
+                } catch (IOException e) {
+                    this.connected = false;
+                    System.out.println("Client input disconnected from Game " + gameNumber);
+                }
+            }
+        });
+        inputThread.start();
+        
+        // Loop principal del juego - actualiza fisica y envia estado
         while (this.connected) {
             try {
-                // Enviar estado del juego
-                sendGameState();
+                // Actualizar fisica del juego
+                game.getPlayer().applyGravity();
+                game.getPlayer().update();
                 
-                // Recibir comando del cliente
-                String message = this.input.readUTF();
-                System.out.println("Game " + gameNumber + " received: " + message);
+                // Actualizar enemigos
+                for (Enemy enemy : game.getEnemies()) {
+                    enemy.patrol();
+                    enemy.update();
+                }
                 
-                // Procesar comando
-                processCommand(message);
+                // Detectar colisiones
+                game.collisions();
                 
-                // Pequeña pausa para no saturar
-                Thread.sleep(50);
+                // Construir estado del juego
+                String gameState = buildGameState();
+                
+                // Enviar estado del juego al cliente jugador
+                this.output.writeUTF(gameState);
+                
+                // Notificar a todos los espectadores (patrón Observer)
+                game.notifyObservers(gameState);
+                
+                // Mantener ~30 actualizaciones por segundo (32ms por frame)
+                Thread.sleep(32);
                 
             } catch (IOException e) {
                 this.connected = false;
@@ -205,6 +252,29 @@ public class GameClientHandler implements Runnable {
                 this.connected = false;
             }
         }
+        
+        // Esperar a que termine el thread de input
+        try {
+            inputThread.join(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        // Cerrar el socket para liberar recursos
+        try {
+            if (!this.client.isClosed()) {
+                this.client.close();
+            }
+        } catch (IOException e) {
+            System.err.println("Error closing client socket: " + e.getMessage());
+        }
+
+        // Notificar desconexión para liberar el slot del juego
+        if (this.disconnectCallback != null) {
+            this.disconnectCallback.onPlayerDisconnect(this.gameNumber);
+        }
+        
+        System.out.println("Game " + gameNumber + " handler thread terminated");
     }
 
     /**
@@ -219,7 +289,7 @@ public class GameClientHandler implements Runnable {
      * Obtiene el número de juego.
      * @return número del juego
      */
-    public int getGameNumber() {
+    public Integer getGameNumber() {
         return this.gameNumber;
     }
 }

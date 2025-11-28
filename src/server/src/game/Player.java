@@ -2,96 +2,129 @@ package game;
 
 import java.lang.Math;
 
+/**
+ * Clase que representa al jugador en el juego.
+ * Hereda de Entity e implementa lógica de movimiento, saltos y escalada.
+ */
 public class Player extends Entity {
-    protected int lives;
-    protected int score;
-    protected boolean onGround;
-    protected boolean climbing;
+    protected Integer lives; // Vidas del jugador
+    protected Integer score; // Puntuación del jugador
+    protected Boolean onGround; // Indica si está en el suelo
+    protected Boolean climbing; // Indica si está escalando una liana
+    protected String currentDirection; //Indica la dirección actual del jugador
 
+    /**
+     * Constructor del jugador.
+     * Inicializa con 3 vidas, puntuación 0 y dimensiones específicas.
+     */
     public Player() {
         this.lives = 3;
         this.score = 0;
         this.onGround = false;
         this.climbing = false;
-        this.width = 32;
+        this.currentDirection = "none";
+        this.width = 16;
         this.height = 16;
         this.vx = 0.0;
         this.vy = 0.0;
     }
 
-    public double getX() {
-        return this.x;
-    }
-
-    public double getY() {
-        return this.y;
-    }
-
+    /**
+     * Obtiene las vidas del jugador.
+     * @return número de vidas
+     */
     public int getLives() {
         return this.lives;
     }
 
+    /**
+     * Obtiene la puntuación del jugador.
+     * @return puntuación actual
+     */
     public int getScore() {
         return this.score;
     }
 
+    public String getState() {
+        if (this.climbing) {
+            return "climbing";
+        } else if (Math.abs(this.vx) > 0.5) {
+            return "walking";
+        } else {
+            return "idle";
+        }
+    }
+
+    /**
+     * Aplica la gravedad al jugador cuando no está en el suelo ni escalando.
+     * Incrementa la velocidad Y hasta una velocidad máxima de caída.
+     */
     public void applyGravity() {
         if (!this.onGround && !this.climbing) {
-            double gravity = 0.5;
+            Double gravity = 0.5;
             this.vy += gravity;
-            double maxFallSpeed = 12;
+            Double maxFallSpeed = 12.0;
             if (this.vy > maxFallSpeed) {
                 this.vy = maxFallSpeed;
             }
         }
     }
 
+    /**
+     * Realiza un salto, estableciendo la velocidad Y negativa.
+     * El jugador deja de estar en el suelo.
+     */
     public void jump() {
-        this.vy = -10;
-        this.onGround = false;
-    }
-
-    public void stop() {
-        if (this.vx < 0) {
-            this.vx += 0.1;
-        } else if (this.vx > 0) {
-            this.vx -= 0.1;
+        if (this.onGround  || this.climbing) {
+            this.vy = -5.0;
+            this.onGround = false;
+            this.climbing = false;
         }
     }
 
+    /**
+     * Reduce gradualmente la velocidad horizontal del jugador.
+     * Simula fricción para frenar al jugador.
+     */
+    public void stop() {
+        // Immediately stop horizontal movement
+        this.vx = 0.0;
+        
+        // If climbing, also stop vertical movement
+        if (this.climbing) {
+            this.vy = 0.0;
+        }
+    }
+
+    /**
+     * Mueve al jugador en una dirección especificada.
+     * Soporta movimiento izquierda, derecha, arriba (escalada/salto) y abajo (descenso).
+     * @param direction dirección del movimiento: "left", "right", "up", "down"
+     */
     public void move(String direction) {
-        int maxSpeed = 9;
-        int maxClimbSpeed = 6;
+        Double moveSpeed = 3.0;  // Constant horizontal speed
+        Double climbSpeed = 2.0; // Constant climbing speed
+
+        this.currentDirection = direction;
         switch (direction) {
             case "up":
                 if (this.climbing) {
-                    this.vy -= 3;
-                    if (Math.abs(this.vy) > maxClimbSpeed) {
-                        this.vy = -maxSpeed;
-                    }
-                } else {
-                    this.jump();
+                    this.vy = -climbSpeed;  // Set constant climbing speed
                 }
                 break;
             case "down":
                 if (this.climbing) {
-                    this.vy += 3;
-                    if (this.vy > maxClimbSpeed) {
-                        this.vy = maxClimbSpeed;
-                    }
+                    this.vy = climbSpeed;  // Set constant climbing speed
                 }
                 break;
             case "left":
-                this.vx -= 3;
-                if (Math.abs(this.vx) > maxSpeed) {
-                    this.vx = -maxSpeed;
-                }
+                this.vx = -moveSpeed;  // Set constant speed left
                 break;
             case "right":
-                this.vx += 3;
-                if (this.vx > maxSpeed) {
-                    this.vx = maxSpeed;
-                }
+                this.vx = moveSpeed;   // Set constant speed right
+                break;
+            case "jump":
+                this.jump();
                 break;
             default:
                 this.stop();

@@ -199,6 +199,123 @@
 
 ---
 
+#### Miércoles 26 de Noviembre, 2025
+**Horas trabajadas:** ~5 horas
+
+**Actividades realizadas:**
+- Implementación casi completa del cliente con nuevas pantallas
+- Mejora significativa en la conectividad con el servidor
+- Sistema de estados del juego expandido:
+  - `GAME_STATE_MENU`: Menú principal
+  - `GAME_STATE_CONNECTING`: Pantalla de conexión como jugador
+  - `GAME_STATE_CONNECTING_SPECTATE`: Conexión como espectador
+  - `GAME_STATE_PLAYING`: Jugando activamente
+  - `GAME_STATE_SPECTATING`: Modo espectador
+  - `GAME_STATE_SPECTATE`: Selección de juego a observar
+- Implementación del protocolo de comunicación:
+  - Cliente envía "play" al conectar como jugador
+  - Cliente envía "spectate X" para espectar juego X
+  - Formato de estado: `STATE|gameNum|PLAYER|data|ENEMIES|data|FRUITS|data`
+- Parsing de estado del juego desde el servidor:
+  - Posición y estado del jugador (x, y, vidas, puntos)
+  - Lista de enemigos con tipo y posición
+  - Lista de frutas/coleccionables
+
+**Problemas encontrados:**
+- Sincronización de estados entre cliente y servidor
+- Formato de mensajes inconsistente
+- Manejo de conexiones no bloqueantes
+
+**Soluciones implementadas:**
+- Socket configurado como no bloqueante para evitar bloqueos
+- Parseo robusto de mensajes con separadores definidos
+- Prefijo de longitud de 2 bytes (formato Java writeUTF) para mensajes
+
+**Aprendizajes:**
+- Importancia de definir un protocolo de comunicación claro desde el inicio
+- Sockets no bloqueantes requieren manejo especial de errores WSAEWOULDBLOCK
+- Diseño de máquina de estados facilita gestión de múltiples modos de juego
+
+---
+
+#### Jueves 27 de Noviembre, 2025
+**Horas trabajadas:** ~4 horas
+
+**Actividades realizadas:**
+**Sesión Tarde (16:37):**
+- Correcciones varias en el sistema de comunicación
+- Ajustes en el manejo de estados del juego
+- Mejoras en la estabilidad de la conexión
+
+**Sesión Noche (18:42):**
+- Corrección mayor de errores en todo el sistema:
+  - **Fix: Parsing de enemigos y frutas**: Cambio de `%d` a `%f` en sscanf
+    - El servidor envía coordenadas como floats (ej: `100.0,50.0`)
+    - El cliente intentaba parsear como enteros, causando fallos
+  - **Fix: Renderizado de enemigos**: Corrección de índices de frames en spritesheet
+  - **Fix: Colección de frutas**: Corrección de `remove(i)` a `remove(i.intValue())`
+    - En Java, `ArrayList.remove(Integer)` busca el objeto, no el índice
+    - Esto causaba que las frutas dieran puntos infinitos sin desaparecer
+- Implementación del patrón Observer para espectadores:
+  - Interfaz `GameObserver` con método `onGameStateUpdate(String gameState)`
+  - Interfaz `GameSubject` con `addObserver`, `removeObserver`, `notifyObservers`
+  - Clase `SpectatorHandler` implementa `GameObserver`
+  - Clase `Logic` implementa `GameSubject`
+- Separación de lógica de espectadores de `GameClientHandler`
+- Espectadores ahora reciben actualizaciones automáticamente vía Observer
+
+**Problemas encontrados:**
+- Enemigos y frutas no aparecían en el cliente
+- Frutas daban puntos infinitos al recogerlas
+- Espectadores no recibían actualizaciones del juego correcto
+- `NullPointerException` en clientsIDs del servidor
+
+**Soluciones implementadas:**
+- Parsing con floats (`%f`) en lugar de integers (`%d`)
+- Uso de `remove(i.intValue())` para eliminar por índice en ArrayList
+- Patrón Observer para desacoplar espectadores del handler de jugadores
+- Inicialización de `Integer clientsIDs = 0` en lugar de null
+
+**Aprendizajes:**
+- Java distingue entre `remove(int index)` y `remove(Object o)` en ArrayList
+- El patrón Observer es ideal para notificar múltiples clientes de cambios de estado
+- Importancia de consistencia entre formatos de datos cliente-servidor
+- Los wrappers de Java (Integer, Double) requieren atención especial con null
+
+---
+
+#### Viernes 28 de Noviembre, 2025
+**Horas trabajadas:** ~3 horas
+
+**Actividades realizadas:**
+- Finalización del sistema de espectadores con patrón Observer
+- Correcciones finales en el parsing de frutas:
+  - Asegurar que todas las secciones usen `%f` para coordenadas
+- Pruebas de integración cliente-servidor completas
+- Verificación de funcionalidad:
+  - ✅ Jugadores pueden conectarse y jugar
+  - ✅ Espectadores pueden observar juegos en curso
+  - ✅ Enemigos se renderizan y mueven correctamente
+  - ✅ Frutas aparecen, se recolectan y desaparecen
+  - ✅ Puntuación y vidas se sincronizan correctamente
+- Documentación del protocolo de comunicación
+
+**Estado final del sistema:**
+- Cliente C/SDL3 completamente funcional
+- Servidor Java con soporte para múltiples juegos
+- Sistema de espectadores usando patrón Observer
+- Comunicación bidireccional estable
+
+**Archivos clave modificados:**
+- `game_logic.c`: Parsing de estado, conexión, comandos
+- `GameClientHandler.java`: Loop del juego, construcción de estado
+- `Logic.java`: Implementación de GameSubject, colisiones
+- `SpectatorHandler.java`: Implementación de GameObserver
+- `Server.java`: Routing de jugadores vs espectadores
+- `App.java`: Registro de handlers y observers
+
+---
+
 ## Resumen General del Proyecto
 
 ### Componentes Desarrollados
@@ -245,9 +362,14 @@
 2. ✅ Sistema de renderizado con presentación lógica y letterboxing
 3. ✅ Arquitectura modular bien estructurada (main.c reducido de 500 a 77 líneas)
 4. ✅ Sistema de animación por frames funcional
-5. ✅ Módulo de networking básico implementado
+5. ✅ Módulo de networking completo con protocolo definido
 6. ✅ Todos los sprites del juego integrados (11 archivos)
 7. ✅ Menú principal con navegación por teclado
+8. ✅ Comunicación cliente-servidor bidireccional funcional
+9. ✅ Sistema de espectadores con patrón Observer
+10. ✅ Sincronización de jugador, enemigos y frutas
+11. ✅ Parsing robusto de mensajes del servidor
+12. ✅ Sistema de estados del juego completo (menú, jugando, espectando)
 
 ### Conclusiones y Reflexiones
 - La modularización temprana es crucial para mantener el código manejable en proyectos C
@@ -259,18 +381,20 @@
 - La implementación de sistemas de estado simplifica el manejo de la lógica del juego
 
 ### Próximos Pasos
-1. Implementar protocolo de comunicación cliente-servidor
-2. Desarrollar servidor en Java con manejo de múltiples clientes
-3. Sincronizar estado del juego entre cliente y servidor
-4. Implementar lógica completa de enemigos y colisiones
-5. Agregar sistema de puntuación y vidas
-6. Implementar niveles del juego
-7. Añadir efectos de sonido y música
+1. Pulir la experiencia de usuario (transiciones, feedback visual)
+2. Agregar efectos de sonido y música
+3. Implementar sistema de niveles progresivos
+4. Mejorar IA de enemigos
+5. Agregar más tipos de coleccionables
+6. Implementar tabla de puntuaciones
+7. Optimizar rendimiento de red
 
 ---
 
 ## Notas Adicionales
-- **Total de commits hasta 25/11/2025:** 9 commits en rama franco-develop
-- **Líneas de código:** ~1,500+ líneas (distribuidas en 10 módulos)
+- **Total de commits hasta 28/11/2025:** 23+ commits en rama franco-develop-2
+- **Líneas de código:** ~2,500+ líneas (cliente C + servidor Java)
 - **Assets:** 11 sprites BMP + 1 fuente TTF
 - **Tamaño del ejecutable:** ~224 KB (main.exe)
+- **Patrones de diseño implementados:** Observer (espectadores), Factory (enemigos/frutas), State (estados del juego)
+- **Protocolo de comunicación:** TCP con mensajes formato Java writeUTF (2-byte length prefix)

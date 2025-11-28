@@ -190,6 +190,29 @@ bool sendToServer(const char* data, size_t length) {
     return true;
 }
 
+bool sendCommandToServer(const char* command) {
+    if (!connection.connected || connection.sockfd == INVALID_SOCKET) {
+        SDL_Log("No hay conexion activa");
+        return false;
+    }
+
+    // Java's writeUTF format: 2-byte length (big-endian) + UTF-8 string
+    size_t commandLen = strlen(command);
+    if (commandLen > 65535) {
+        SDL_Log("Comando demasiado largo");
+        return false;
+    }
+
+    // Crear buffer con prefijo de longitud
+    unsigned char buffer[65538]; // Max UTF string + 2-byte length
+    buffer[0] = (commandLen >> 8) & 0xFF;  // High byte
+    buffer[1] = commandLen & 0xFF;         // Low byte
+    memcpy(buffer + 2, command, commandLen);
+
+    // Enviar con prefijo de longitud
+    return sendToServer((const char*)buffer, commandLen + 2);
+}
+
 int receiveFromServer(char* buffer, size_t bufferSize) {
     if (!connection.connected || connection.sockfd == INVALID_SOCKET) {
         return -1;
