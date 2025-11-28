@@ -59,23 +59,37 @@ void handleGameInput(SDL_Event* event) {
                 break;
             case SDLK_W:
             case SDLK_UP:
-                // TODO: Enviar comando "move_up" al servidor
-                SDL_Log("Input: Move Up (enviar al servidor)");
+                if (isConnected()) {
+                    sendCommandToServer("climb_up");
+                    SDL_Log("Sent: climb_up");
+                }
                 break;
             case SDLK_S:
             case SDLK_DOWN:
-                // TODO: Enviar comando "move_down" al servidor
-                SDL_Log("Input: Move Down (enviar al servidor)");
+                if (isConnected()) {
+                    sendCommandToServer("climb_down");
+                    SDL_Log("Sent: climb_down");
+                }
                 break;
             case SDLK_A:
             case SDLK_LEFT:
-                // TODO: Enviar comando "move_left" al servidor
-                SDL_Log("Input: Move Left (enviar al servidor)");
+                if (isConnected()) {
+                    sendCommandToServer("move_left");
+                    SDL_Log("Sent: move_left");
+                }
                 break;
             case SDLK_D:
             case SDLK_RIGHT:
-                // TODO: Enviar comando "move_right" al servidor
-                SDL_Log("Input: Move Right (enviar al servidor)");
+                if (isConnected()) {
+                    sendCommandToServer("move_right");
+                    SDL_Log("Sent: move_right");
+                }
+                break;
+            case SDLK_SPACE:
+                if (isConnected()) {
+                    sendCommandToServer("jump");
+                    SDL_Log("Sent: jump");
+                }
                 break;
             case SDLK_E:
                 // Debug: Solicitar spawn de enemigo al servidor
@@ -93,8 +107,10 @@ void handleGameInput(SDL_Event* event) {
             case SDLK_LEFT:
             case SDLK_D:
             case SDLK_RIGHT:
-                // TODO: Enviar comando "stop" al servidor
-                SDL_Log("Input: Stop (enviar al servidor)");
+                if (isConnected()) {
+                    sendCommandToServer("stop");
+                    SDL_Log("Sent: stop");
+                }
                 break;
         }
     }

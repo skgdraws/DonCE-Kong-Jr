@@ -6,6 +6,8 @@ static Player player = {
     .x = 100.0f,
     .y = 200.0f,
     .size = PLAYER_SIZE,
+    .lives = 3,
+    .score = 0,
     .spriteIndex = SPRITE_IDLE_1,
     .animCounter = 0
 };
@@ -18,6 +20,10 @@ void updatePlayerFromServer(ServerPlayerData* serverData) {
     // Actualizar posicion directamente desde el servidor
     player.x = serverData->x;
     player.y = serverData->y;
+    
+    // Actualizar vidas y puntuacion
+    player.lives = serverData->lives;
+    player.score = serverData->score;
     
     // Determinar sprite base segun el estado del servidor
     int baseSprite;

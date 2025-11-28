@@ -78,7 +78,8 @@ public class GameClientHandler implements Runnable {
         gameState.append(game.getPlayer().getX()).append(",");
         gameState.append(game.getPlayer().getY()).append(",");
         gameState.append(game.getPlayer().getLives()).append(",");
-        gameState.append(game.getPlayer().getScore()).append(GAME_STATE_SEPARATOR);
+        gameState.append(game.getPlayer().getScore()).append(",");
+        gameState.append(game.getPlayer().getState()).append(GAME_STATE_SEPARATOR);
         
         // Send enemies information with type and position
         gameState.append("ENEMIES").append(GAME_STATE_SEPARATOR);
@@ -182,19 +183,41 @@ public class GameClientHandler implements Runnable {
     public void run() {
         System.out.println("Game " + gameNumber + " handler started");
         
+        // Thread separado para recibir comandos
+        Thread inputThread = new Thread(() -> {
+            while (this.connected) {
+                try {
+                    String message = this.input.readUTF();
+                    System.out.println("Game " + gameNumber + " received: " + message);
+                    processCommand(message);
+                } catch (IOException e) {
+                    this.connected = false;
+                    System.out.println("Client input disconnected from Game " + gameNumber);
+                }
+            }
+        });
+        inputThread.start();
+        
+        // Loop principal del juego - actualiza fisica y envia estado
         while (this.connected) {
             try {
-                // Enviar estado del juego
+                // Actualizar fisica del juego
+                game.getPlayer().applyGravity();
+                game.getPlayer().update();
+                
+                // Actualizar enemigos
+                for (Enemy enemy : game.getEnemies()) {
+                    enemy.patrol();
+                    enemy.update();
+                }
+                
+                // Detectar colisiones
+                game.collisions();
+                
+                // Enviar estado del juego al cliente
                 sendGameState();
                 
-                // Recibir comando del cliente
-                String message = this.input.readUTF();
-                System.out.println("Game " + gameNumber + " received: " + message);
-                
-                // Procesar comando
-                processCommand(message);
-                
-                // Pequeña pausa para no saturar
+                // Mantener ~20 actualizaciones por segundo (50ms por frame)
                 Thread.sleep(50);
                 
             } catch (IOException e) {
@@ -204,6 +227,13 @@ public class GameClientHandler implements Runnable {
                 Thread.currentThread().interrupt();
                 this.connected = false;
             }
+        }
+        
+        // Esperar a que termine el thread de input
+        try {
+            inputThread.join(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 

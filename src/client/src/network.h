@@ -42,6 +42,13 @@ void disconnectFromServer(void);
 bool sendToServer(const char* data, size_t length);
 
 /**
+ * @brief Envia un comando al servidor en formato Java UTF
+ * @param command Comando de texto a enviar (sera envuelto en formato UTF con prefijo de longitud)
+ * @return true si el envio fue exitoso, false en caso contrario
+ */
+bool sendCommandToServer(const char* command);
+
+/**
  * @brief Recibe datos del servidor (operacion no bloqueante)
  * @param buffer Buffer donde almacenar los datos recibidos
  * @param bufferSize Tamaño del buffer

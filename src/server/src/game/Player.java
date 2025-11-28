@@ -35,6 +35,16 @@ public class Player extends Entity {
         return this.score;
     }
 
+    public String getState() {
+        if (this.climbing) {
+            return "climbing";
+        } else if (Math.abs(this.vx) > 0.5) {
+            return "walking";
+        } else {
+            return "idle";
+        }
+    }
+
     public void applyGravity() {
         if (!this.onGround && !this.climbing) {
             double gravity = 0.5;
@@ -47,15 +57,20 @@ public class Player extends Entity {
     }
 
     public void jump() {
-        this.vy = -10;
-        this.onGround = false;
+        if (this.onGround) {
+            this.vy = -10;
+            this.onGround = false;
+        }
     }
 
     public void stop() {
-        if (this.vx < 0) {
-            this.vx += 0.1;
+        // Apply friction to slow down
+        if (Math.abs(this.vx) < 0.5) {
+            this.vx = 0;
+        } else if (this.vx < 0) {
+            this.vx += 0.5;
         } else if (this.vx > 0) {
-            this.vx -= 0.1;
+            this.vx -= 0.5;
         }
     }
 

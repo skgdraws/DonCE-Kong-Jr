@@ -58,6 +58,10 @@ public class Logic {
     public void setPlayer() {
         this.player.x = 6;
         this.player.y = 224;
+        this.player.vx = 0;
+        this.player.vy = 0;
+        this.player.onGround = false;
+        this.player.climbing = false;
     }
 
     public void run() {
@@ -71,22 +75,44 @@ public class Logic {
 
     public void collisions() {
         Rectangle playerRect = this.player.getBounds();
+        
+        // Reset onGround flag - will be set to true if player is on a platform
+        this.player.onGround = false;
+        
         for (Platform platform : this.platforms) {
             Rectangle platformRect = platform.getBounds();
             if (playerRect.intersects(platformRect)) {
-                if (this.player.vx > 0) {
-                    this.player.x = platform.x - this.player.width;
-                } else if (player.vx < 0) {
-                    this.player.x = platform.x + this.player.width;
-                }
-                this.player.vx = 0;
-                if (this.player.vy > 0) {
+                // Calculate overlap amounts
+                double overlapLeft = (this.player.x + this.player.width) - platform.x;
+                double overlapRight = (platform.x + platform.width) - this.player.x;
+                double overlapTop = (this.player.y + this.player.height) - platform.y;
+                double overlapBottom = (platform.y + platform.height) - this.player.y;
+                
+                // Find the smallest overlap to determine collision direction
+                double minOverlap = Math.min(Math.min(overlapLeft, overlapRight), 
+                                            Math.min(overlapTop, overlapBottom));
+                
+                // Only resolve collision if overlap is significant (prevents jittering)
+                if (minOverlap < 0.1) continue;
+                
+                // Resolve collision based on the direction with smallest overlap
+                if (minOverlap == overlapTop && this.player.vy >= 0) {
+                    // Colliding from top (player landing on platform)
                     this.player.y = platform.y - this.player.height;
                     this.player.vy = 0;
                     this.player.onGround = true;
-                } else if (this.player.vy < 0) {
-                    this.player.y = platform.y + this.player.height;
+                } else if (minOverlap == overlapBottom && this.player.vy < 0) {
+                    // Colliding from bottom (player hitting ceiling)
+                    this.player.y = platform.y + platform.height;
                     this.player.vy = 0;
+                } else if (minOverlap == overlapLeft && this.player.vx > 0) {
+                    // Colliding from left side
+                    this.player.x = platform.x - this.player.width;
+                    this.player.vx = 0;
+                } else if (minOverlap == overlapRight && this.player.vx < 0) {
+                    // Colliding from right side
+                    this.player.x = platform.x + platform.width;
+                    this.player.vx = 0;
                 }
             }
         }
@@ -101,7 +127,7 @@ public class Logic {
                 this.setPlayer();
             }
         }
-        if (playerRect.intersects(Boss) || this.player.y > 250) {
+        if (playerRect.intersects(Boss) || this.player.y + this.player.height > 256) {
             this.player.lives -= 1;
             this.setPlayer();
         }

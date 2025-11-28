@@ -23,6 +23,8 @@
 typedef struct {
     float x;              ///< Posicion X del jugador
     float y;              ///< Posicion Y del jugador
+    int lives;            ///< Vidas del jugador
+    int score;            ///< Puntuacion del jugador
     const char* state;    ///< Estado del jugador ("idle", "walking", "climbing")
 } ServerPlayerData;
 
@@ -33,6 +35,8 @@ typedef struct {
     float x;            ///< Posicion X en pantalla
     float y;            ///< Posicion Y en pantalla
     float size;         ///< Tamaño para colisiones
+    int lives;          ///< Vidas del jugador
+    int score;          ///< Puntuacion del jugador
     int spriteIndex;    ///< Indice del sprite actual
     int animCounter;    ///< Contador de frames de animacion
 } Player;
